@@ -1,4 +1,7 @@
 import random
+from mlx import Mlx
+from typing import Any
+
 
 class MazeError(Exception):
     pass
@@ -127,32 +130,82 @@ class Maze:
                 # dessine le 42 pendant le parcours du tableau
                 if (
                     can_draw
-                    and line >= int(self.height/2) - 3
-                    and line < len(self.drawing) + int(self.height/2) - 3
-                    and col >= int(self.width/2) - 3
-                    and col < len(self.drawing[0]) + int(self.width/2) - 3
-                    and self.drawing[line - int(self.height/2) + 3]
-                    [col - int(self.width/2) + 3] == 1
+                    and line >= int(self.height / 2) - 3
+                    and line < len(self.drawing) + int(self.height / 2) - 3
+                    and col >= int(self.width / 2) - 3
+                    and col < len(self.drawing[0]) + int(self.width / 2) - 3
+                    and self.drawing[line - int(self.height / 2) + 3][
+                        col - int(self.width / 2) + 3
+                    ]
+                    == 1
                 ):
                     self.maze[line][col] = 0b11111
                 # choisist un nombre dedirection au hasard, casse les murs
+        # walker = Walker()
+        # walker.walk()
+
+    def to_background_image(self, m: Mlx, img_ptr: Any):
+        data, _, line_size, format = m.mlx_get_data_addr(img_ptr)
+        for line in range(self.height * self.cell_size):
+            for col in range(self.width * self.cell_size):
+                r, g, b, a = 100, 100, 200, 254
+                if 2 * 100 <= col <= 4 * 100 and 2 * 100 <= line <= 4 * 100:
+                    r, g, b, a = 255, 0, 0, 254
+                if format == 0:
+                    data[4 * col + line * line_size] = b
+                    data[4 * col + line * line_size + 1] = g
+                    data[4 * col + line * line_size + 2] = r
+                    data[4 * col + line * line_size + 3] = a
                 else:
-                    nb_dir = random.randrange(1, 3)
-                    rand_dir_tab = self.dir.copy()
-                    random.shuffle(rand_dir_tab)
-                    for i in range(nb_dir):
-                        if not (self.cross_border(rand_dir_tab[i], line, col)):
-                            self.put_in_maze([line, col], rand_dir_tab[i])
-                        # verifie que son voisin a bien le mur correspondant cassé 
-                        if rand_dir_tab[i] == self.north:
-                            if self.is_in_bound([line - 1, col]):
-                                self.put_in_maze([line - 1, col], self.south)
-                        if rand_dir_tab[i] == self.south:
-                            if self.is_in_bound([line + 1, col]):
-                                self.put_in_maze([line + 1, col], self.north)
-                        if rand_dir_tab[i] == self.west:
-                            if self.is_in_bound([line, col - 1]):
-                                self.put_in_maze([line, col - 1], self.east)
-                        if rand_dir_tab[i] == self.east:
-                            if self.is_in_bound([line, col + 1]):
-                                self.put_in_maze([line, col + 1], self.west)
+                    data[4 * col + line * line_size] = a
+                    data[4 * col + line * line_size + 1] = r
+                    data[4 * col + line * line_size + 2] = g
+                    data[4 * col + line * line_size + 3] = b
+
+    def to_image(self, m: Mlx, img_ptr: Any):
+        data, _, line_size, format = m.mlx_get_data_addr(img_ptr)
+        self.to_background_image(m, img_ptr)
+
+        def write_line(start, incr, color=(0, 0, 0, 255)):
+            for _ in range(self.cell_size):
+                r, g, b, a = color
+                print(start)
+                if format == 0:
+                    data[start] = b
+                    data[start + 1] = g
+                    data[start + 2] = r
+                    data[start + 3] = a
+                else:
+                    data[start] = a
+                    data[start + 1] = r
+                    data[start + 2] = g
+                    data[start + 3] = b
+                start += incr
+
+        for line in range(self.height):
+            for col in range(self.width):
+                if self.maze[line][col] & 0b1000:
+                    write_line(
+                        self.cell_size * 4 * col
+                        + self.cell_size * line_size * line,
+                        4,
+                    )
+                if self.maze[line][col] & 0b0100:
+                    write_line(
+                        self.cell_size * 4 * (col + 1)
+                        + self.cell_size * line_size * line,
+                        line_size,
+                    )
+                if self.maze[line][col] & 0b0010:
+                    write_line(
+                        self.cell_size * 4 * col
+                        + self.cell_size * line_size * (line + 1)
+                        - line_size,
+                        4,
+                    )
+                if self.maze[line][col] & 0b0001:
+                    write_line(
+                        self.cell_size * 4 * (col)
+                        + self.cell_size * line_size * line,
+                        line_size,
+                    )
