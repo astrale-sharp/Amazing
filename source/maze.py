@@ -1,4 +1,3 @@
-import random
 from mlx import Mlx
 from typing import Any
 
@@ -8,9 +7,16 @@ class MazeError(Exception):
 
 
 class Maze:
-    def __init__(self, height: int, width: int,
-                 entry: list, exit: list,
-                 output_file: str, perfect: bool) -> None:
+    def __init__(
+        self,
+        height: int,
+        width: int,
+        entry: list,
+        exit: list,
+        output_file: str,
+        perfect: bool,
+        cell_size: int = 50,
+    ) -> None:
         self.width = width
         self.height = height
         self.entry = entry
@@ -22,15 +28,16 @@ class Maze:
         self.west = 0b1011
         self.south = 0b1101
         self.east = 0b1110
-        self.dir: list = [self.north,
-                          self.west,
-                          self.south,
-                          self.east]
-        self.drawing: list = [[1, 0, 0, 0, 1, 1, 1],
-                              [1, 0, 0, 0, 0, 0, 1],
-                              [1, 1, 1, 0, 1, 1, 1],
-                              [0, 0, 1, 0, 1, 0, 0],
-                              [0, 0, 1, 0, 1, 1, 1]]
+        self.dir: list = [self.north, self.west, self.south, self.east]
+        self.cell_size: int = cell_size
+
+        self.drawing: list = [
+            [1, 0, 0, 0, 1, 1, 1],
+            [1, 0, 0, 0, 0, 0, 1],
+            [1, 1, 1, 0, 1, 1, 1],
+            [0, 0, 1, 0, 1, 0, 0],
+            [0, 0, 1, 0, 1, 1, 1],
+        ]
 
     def print_maze(self, convert: str | None = None) -> None:
         if convert:
@@ -80,29 +87,33 @@ class Maze:
             print()
 
     def is_in_bound(self, pos) -> bool:
-        return (pos[0] < self.height and pos[0] >= 0
-                and pos[1] < self.width and pos[1] >= 0)
+        return (
+            pos[0] < self.height
+            and pos[0] >= 0
+            and pos[1] < self.width
+            and pos[1] >= 0
+        )
 
     def put_in_maze(self, pos: list, value: int) -> None:
         # casse le mur value a la position pos
         line = pos[0]
         col = pos[1]
-        if (
-            self.is_in_bound(pos)
-            and self.maze[line][col] < 0b11111
-        ):
+        if self.is_in_bound(pos) and self.maze[line][col] < 0b11111:
             self.maze[line][col] = self.maze[line][col] & value
 
     def init_maze(self) -> None:
         # init un maze que avec murs
         if self.width > 0 and self.height > 0:
-            self.maze = [[0b1111 for _ in range(self.width)]
-                         for _ in range(self.height)]
+            self.maze = [
+                [0b1111 for _ in range(self.width)] for _ in range(self.height)
+            ]
             self.put_in_maze(self.entry, 0b0000)
             self.put_in_maze(self.exit, 0b0000)
         else:
-            raise MazeError("Invalid information:\
- width and height must be > 0")
+            raise MazeError(
+                "Invalid information:\
+ width and height must be > 0"
+            )
 
     def can_draw_42(self) -> bool:
         return (
@@ -112,16 +123,16 @@ class Maze:
 
     def cross_border(self, value: int, line: int, col: int):
         # retourne true si on risque de traverser la limite
-        if (value == self.north and line == 0):
-            return (True)
-        elif (value == self.south and line == self.height - 1):
-            return (True)
-        elif (value == self.east and col == self.width - 1):
-            return (True)
-        elif (value == self.west and col == 0):
-            return (True)
+        if value == self.north and line == 0:
+            return True
+        elif value == self.south and line == self.height - 1:
+            return True
+        elif value == self.east and col == self.width - 1:
+            return True
+        elif value == self.west and col == 0:
+            return True
         else:
-            return (False)
+            return False
 
     def draw_maze(self) -> None:
         can_draw = self.can_draw_42()

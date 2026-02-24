@@ -1,24 +1,29 @@
 from source.maze import Maze
-import random
 from mlx import Mlx
 
 m = Mlx()
 mlx_ptr = m.mlx_init()
 
+
 def mymouse(button, x, y, extra: Maze):
     pass
+
 
 def mykey(keynum, extra: Maze):
     if keynum == 65307 or keynum == 113:
         m.mlx_loop_exit(mlx_ptr)
         m.mlx_mouse_hook(win_ptr, None, None)
 
+
 test = Maze(5, 5, [0, 0], [19, 19], "test", False)
-test.init_maze() # move into __init__?
+test.init_maze()  # move into __init__?
 
 
 win_ptr = m.mlx_new_window(
-    mlx_ptr, test.cell_size * test.width + 1, test.cell_size * test.height + 1, "a_main_window"
+    mlx_ptr,
+    test.cell_size * test.width + 1,
+    test.cell_size * test.height + 1,
+    "a_main_window",
 )
 
 img_ptr = m.mlx_new_image(
