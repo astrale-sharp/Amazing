@@ -42,6 +42,12 @@ class Maze:
                         weigth_square += self.maze[i+x][j+y]
 
     def print_maze(self, convert: str | None = None) -> None:
+        '''print the maze
+            convert: bin to print the maze in binary
+                    int to print the maze in ints
+                    hex to print the maze in hexa (Mandatory)
+                    Nothing to print the maze in ascii'''
+
         if convert and convert != "yes" and convert != "hex":
             if convert == "bin":
                 func = bin
@@ -63,9 +69,7 @@ class Maze:
                 for cell in line:
                     print(cell, end="")
                 print()
-
         else:
-            # affiche le tableau version joli
             print(" ")
             for _ in range(self.width):
                 print("__", end="")
@@ -76,6 +80,8 @@ class Maze:
                     cell = self.maze[line][col]
                     if cell == 0b11111:
                         print("##", end="")
+                    elif cell == 98:
+                        print("++", end="")
                     else:
                         if (cell >> 1) & 1 == 1:
                             print("_", end="")
@@ -92,11 +98,16 @@ class Maze:
             print(" ", end="")
             print()
 
-    def is_in_bound(self, pos) -> bool:
+    def is_in_bound(self, pos: list) -> bool:
+        '''checks if the current position pos is not outside the maze
+            pos: list of coords we want to check'''
+
         return (pos[0] < self.height and pos[0] >= 0
                 and pos[1] < self.width and pos[1] >= 0)
 
     def put_in_maze(self, pos: list, value: int) -> None:
+        '''put the wanted wall (value) at the position pos in maze'''
+
         line = pos[0]
         col = pos[1]
         if (
@@ -106,6 +117,9 @@ class Maze:
             self.maze[line][col] = self.maze[line][col] & value
 
     def init_maze(self) -> None:
+        '''Init the maze, full of unexplored cells (only walls), and if
+        possible draw the given drawing in the middle of the maze'''
+
         if self.width > 0 and self.height > 0:
             self.maze = [[0b1111 for _ in range(self.width)]
                          for _ in range(self.height)]
@@ -128,35 +142,9 @@ class Maze:
  width and height must be > 0")
 
     def can_draw_42(self) -> bool:
+        '''checks if the maze is tall enough to draw the drawing'''
+
         return (
             len(self.drawing) <= self.height
             and len(self.drawing[0]) <= self.width
         )
-
-    def cross_border(self, value: int, line: int, col: int):
-        if (value == self.north and line == 0):
-            return (True)
-        elif (value == self.south and line == self.height - 1):
-            return (True)
-        elif (value == self.east and col == self.width - 1):
-            return (True)
-        elif (value == self.west and col == 0):
-            return (True)
-        else:
-            return (False)
-
-    def open_wall_is(self, pos: list) -> list:
-        i = pos[0]
-        j = pos[1]
-        open_path = []
-        if self.maze[i][j] == 98:
-            return (open_path)
-        if self.maze[i][j] & 1 == 0:
-            open_path.append(self.west)
-        if self.maze[i][j] >> 1 & 1 == 0:
-            open_path.append(self.south)
-        if self.maze[i][j] >> 2 & 1 == 0:
-            open_path.append(self.east)
-        if self.maze[i][j] >> 3 & 1 == 0:
-            open_path.append(self.north)
-        return (open_path)
