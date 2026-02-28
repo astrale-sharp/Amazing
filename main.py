@@ -11,7 +11,7 @@ def main():
             "entry": [0, 0],
             "exit": [19, 2],
             "output_file": "test.txt",
-            "perfect": False
+            "perfect": True
             }
 
     # create a maze object

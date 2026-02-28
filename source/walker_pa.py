@@ -60,7 +60,8 @@ class Walker:
         # return not try_pos or self.maze.is_in_bound(try_pos) or self.maze.is_in_bound(try_pos)
         if not try_pos:
             return (False)
-        return (self.maze.is_in_bound(try_pos))
+        return (self.maze.is_in_bound(try_pos)
+                and self.maze.maze[try_pos[0]][try_pos[1]] < 0b1111)
 
     def update_dir(self, way_to_open: int) -> None:
         '''break the wall of the cell's neighboors
