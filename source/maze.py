@@ -13,7 +13,6 @@ class Maze:
         self.exit = exit
         self.output_file = output_file
         self.perfect = perfect
-        self.maze: list = []
         self.north = 0b0111
         self.east = 0b1011
         self.south = 0b1101
@@ -23,6 +22,7 @@ class Maze:
                           self.west,
                           self.south,
                           self.east]
+        self.maze: list = []
         self.drawing: list = [[1, 0, 0, 0, 1, 1, 1],
                               [1, 0, 0, 0, 0, 0, 1],
                               [1, 1, 1, 0, 1, 1, 1],
@@ -47,56 +47,57 @@ class Maze:
                     int to print the maze in ints
                     hex to print the maze in hexa (Mandatory)
                     Nothing to print the maze in ascii'''
-
-        if convert and convert != "yes" and convert != "hex":
-            if convert == "bin":
-                func = bin
-            elif convert == "int":
-                func = int
-            for col in self.maze:
-                for cell in col:
-                    print(func(cell), end="\t")
-                print()
-        elif convert == "hex":
-            hexa = ['0', '1', '2', '3', '4',
-                    '5', '6', '7', '8', '9',
-                    'A', 'B', 'C', 'D', 'E', 'F']
-            maze = [[] for _ in range(self.height + 1)]
-            for line in range(self.height):
-                for col in range(self.width):
-                    maze[line].append(hexa[self.maze[line][col] % 16])
-            for line in maze:
-                for cell in line:
-                    print(cell, end="")
-                print()
-        else:
-            print(" ")
-            for _ in range(self.width):
-                print("__", end="")
-            print()
-            for line in range(self.height):
-                print("|", end="")
-                for col in range(self.width):
-                    cell = self.maze[line][col]
-                    if cell == 0b11111:
-                        print("##", end="")
-                    elif cell == 98:
-                        print("++", end="")
-                    else:
-                        if (cell >> 1) & 1 == 1:
-                            print("_", end="")
-                        else:
-                            print(" ", end="")
-                        if cell >> 2 & 1 == 1:
-                            print("|", end="")
+        with open(self.output_file, 'a') as f:
+            f.write("ICIIIIIICIICIICI")
+            if convert and convert != "yes" and convert != "hex":
+                if convert == "bin":
+                    func = bin
+                elif convert == "int":
+                    func = int
+                for col in self.maze:
+                    for cell in col:
+                        f.write(func(cell))
+                    f.write("\n")
+            elif convert == "hex":
+                hexa = ['0', '1', '2', '3', '4',
+                        '5', '6', '7', '8', '9',
+                        'A', 'B', 'C', 'D', 'E', 'F']
+                maze = [[] for _ in range(self.height + 1)]
+                for line in range(self.height):
+                    for col in range(self.width):
+                        maze[line].append(hexa[self.maze[line][col] % 16])
+                for line in maze:
+                    for cell in line:
+                        f.write(cell)
+                    f.write("\n")
+            else:
+                f.write(" ")
+                for _ in range(self.width):
+                    f.write("__")
+                f.write("\n")
+                for line in range(self.height):
+                    f.write("|")
+                    for col in range(self.width):
+                        cell = self.maze[line][col]
+                        if cell == 0b11111:
+                            f.write("##")
+                        elif cell == 98:
+                            f.write("++")
                         else:
                             if (cell >> 1) & 1 == 1:
-                                print("_", end="")
+                                f.write("_")
                             else:
-                                print(" ", end="")
-                print()
-            print(" ", end="")
-            print()
+                                f.write(" ")
+                            if cell >> 2 & 1 == 1:
+                                f.write("|")
+                            else:
+                                if (cell >> 1) & 1 == 1:
+                                    f.write("_")
+                                else:
+                                    f.write(" ")
+                    f.write("\n")
+                f.write(" ")
+                f.write("\n")
 
     def is_in_bound(self, pos: list) -> bool:
         '''checks if the current position pos is not outside the maze

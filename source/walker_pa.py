@@ -1,7 +1,6 @@
 from .maze import Maze
 import random
 
-
 class Walker:
     def __init__(self, maze: Maze):
         self.maze = maze
@@ -37,7 +36,7 @@ class Walker:
             pos: int = the current position in the maze
             --> Usefull to create a loop, for inperfect mazes'''
 
-        try_pos = None
+        try_pos = [-1, -1]
         if (
             wall_to_open == self.maze.north
             and self.maze.maze[pos[0]][pos[1]] >> 3 & 1 == 1
@@ -58,9 +57,8 @@ class Walker:
             and self.maze.maze[pos[0]][pos[1]] & 1 == 1
         ):
             try_pos = [pos[0], pos[1] - 1]
+        # return not try_pos or self.maze.is_in_bound(try_pos) or self.maze.is_in_bound(try_pos)
         if not try_pos:
-            return (False)
-        elif self.maze.is_in_bound(try_pos):
             return (False)
         return (self.maze.is_in_bound(try_pos))
 
@@ -121,6 +119,7 @@ class Walker:
             possible_ways = [x for x in self.maze.dir
                              if self.loop_the_path(
                                  x, [self.pos_line, self.pos_col])]
+            print(possible_ways)
             if possible_ways:
                 try_way = random.choice(possible_ways)
                 self.maze.put_in_maze([self.pos_line, self.pos_col], try_way)
@@ -168,3 +167,4 @@ class Walker:
                 self.pos_col = last_check_pos[1]
             else:
                 self.draw_path()
+                self.maze.print_maze()
