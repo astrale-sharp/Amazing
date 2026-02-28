@@ -1,45 +1,46 @@
 from source.maze import Maze
 from source.walker_pa import Walker
 from source.find_way import SolveMaze
-import time
 
 
-# init values
-args = {
-        "height": 10,
-        "width": 10,
-        "entry": [0, 0],
-        "exit": [9, 2],
-        "output_file": "test",
-        "perfect": False
-        }
+def main():
+    # init values
+    args = {
+            "height": 20,
+            "width": 20,
+            "entry": [0, 0],
+            "exit": [19, 2],
+            "output_file": "test.txt",
+            "perfect": False
+            }
 
-# create a maze object
-test = Maze(**args)
+    # create a maze object
+    maze = Maze(**args)
 
-# create an empty maze
-test.init_maze()
+    # print it (initiall)
+    print(maze.print_maze())
 
-# print it
-test.print_maze()
-from random import seed
-seed(14)
+    # init a walker (a valid and initiated maze as argument)
+    walk = Walker(maze)
 
-# init a walker (a valid and initiated maze as argument)
-walk = Walker(test)
+    # walk through the empty maze and generate it
+    walk.walk_and_fill()
 
-# walk through the empty maze and generate it
-x = time.time()
-walk.walk_and_fill()
-print(time.time() - x)
+    # store the new maze
+    content = maze.print_maze()
 
-# print the new maze
-test.print_maze()
-test.print_maze("hex")
-# init the solver
-solvmaze = SolveMaze(test)
+    # store the hexa maze(MANDATORY)
+    content += maze.print_maze("hex")
 
-# outpouts the shortest way, and the time it took
-x = time.time()
-print(solvmaze.output_shortest_way())
-print(time.time() - x)
+    # init the solver
+    solvmaze = SolveMaze(maze)
+
+    # store the shortest way(MANDATORY)
+    content += solvmaze.output_shortest_way()
+
+    with open(maze.output_file, 'w') as f:
+        f.write(content)
+
+
+if __name__ == "__main__":
+    main()

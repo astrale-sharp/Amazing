@@ -10,12 +10,6 @@ class SolveMaze:
         self.pos_col = self.entry[1]
         self.way = [[]]
         self.explored = [self.entry]
-        self.reverse = {
-                            self.maze.north: self.maze.south,
-                            self.maze.south: self.maze.north,
-                            self.maze.west: self.maze.east,
-                            self.maze.east: self.maze.west
-        }
         self.is_in_bound = self.maze.is_in_bound
 
     def travel_in_maze(self, dir: int) -> None:
@@ -39,13 +33,13 @@ class SolveMaze:
 
         cell_open = []
         if cell & 1 == 0:
-            cell_open.append(self.maze.west)
-        if cell >> 1 & 1 == 0:
-            cell_open.append(self.maze.south)
-        if cell >> 2 & 1 == 0:
-            cell_open.append(self.maze.east)
-        if cell >> 3 & 1 == 0:
             cell_open.append(self.maze.north)
+        if cell >> 1 & 1 == 0:
+            cell_open.append(self.maze.east)
+        if cell >> 2 & 1 == 0:
+            cell_open.append(self.maze.south)
+        if cell >> 3 & 1 == 0:
+            cell_open.append(self.maze.west)
         return (cell_open)
 
     def djikstra_matrix(self) -> list[list[int]]:
