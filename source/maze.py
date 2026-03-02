@@ -171,18 +171,23 @@ class Maze:
         return content
 
     def draw_maze(self) -> None:
+        draw_line = len(self.drawing)
+        draw_col = len(self.drawing)
         can_draw = self.can_draw_42()
         for line in range(self.height):
             for col in range(self.width):
                 # dessine le 42 pendant le parcours du tableau
                 if (
                     can_draw
-                    and line >= int(self.height / 2) - 3
-                    and line < len(self.drawing) + int(self.height / 2) - 3
-                    and col >= int(self.width / 2) - 3
-                    and col < len(self.drawing[0]) + int(self.width / 2) - 3
-                    and self.drawing[line - int(self.height / 2) + 3][
-                        col - int(self.width / 2) + 3
+                    and line >= int(self.height / 2) - int(draw_line/2)
+                    and line < len(self.drawing) +
+                    int(self.height / 2) - int(draw_line/2)
+                    and col >= int(self.width / 2) - int(draw_col/2)
+                    and col < len(self.drawing[0]) +
+                    int(self.width / 2) - int(draw_col/2)
+                    and self.drawing[line - int(self.height / 2) +
+                                     draw_line - int(draw_line/2)][
+                        col - int(self.width / 2) + draw_col - int(draw_col/2)
                     ]
                     == 1
                 ):
