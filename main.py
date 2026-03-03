@@ -2,27 +2,11 @@ from source.maze import Maze
 from source.walker_pa import Walker
 from source.find_way import SolveMaze
 import time
-from mlx import Mlx
 
 
 def main(args):
-
-    m = Mlx()
-    mlx_ptr = m.mlx_init()
-
-    def mymouse(button, x, y, extra: Maze):
-        pass
-
-    def mykey(keynum, extra: Maze):
-        if keynum == 65307 or keynum == 113:
-            m.mlx_loop_exit(mlx_ptr)
-            m.mlx_mouse_hook(win_ptr, None, None)
-
     # create a maze object
     maze = Maze(**args)
-
-    # print it (initiall)
-    # print(maze.print_maze())
 
     # init a walker (a valid and initiated maze as argument)
     walk = Walker(maze)
@@ -32,28 +16,6 @@ def main(args):
     walk.walk_and_fill()
     print(maze.print_maze())
     print("Creation time", time.time() - x)
-
-    win_ptr = m.mlx_new_window(
-        mlx_ptr,
-        maze.cell_size * maze.width + 1,
-        maze.cell_size * maze.height + 1,
-        "a_main_window",
-    )
-
-    img_ptr = m.mlx_new_image(
-        mlx_ptr,
-        maze.cell_size * maze.width + 1,
-        maze.cell_size * maze.height + 1,
-    )
-
-    m.mlx_mouse_hook(win_ptr, mymouse, maze)
-    m.mlx_key_hook(win_ptr, mykey, maze)
-    maze.to_image(m, img_ptr)
-
-    m.mlx_put_image_to_window(mlx_ptr, win_ptr, img_ptr, 0, 0)
-
-    # store the new maze
-    # content = maze.print_maze()
 
     # store the hexa maze(MANDATORY)
     content = maze.print_maze("hex")
@@ -68,12 +30,6 @@ def main(args):
 
     with open(maze.output_file, "w") as f:
         f.write(content)
-
-    m.mlx_loop(mlx_ptr)
-
-    m.mlx_destroy_window(mlx_ptr, win_ptr)
-    data, _, _, _ = m.mlx_get_data_addr(img_ptr)
-    m.mlx_release(mlx_ptr)
 
 
 if __name__ == "__main__":
