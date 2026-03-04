@@ -15,6 +15,7 @@ class CheckedResult(BaseModel):
     animate_generation: Optional[bool]
     animate_shortest_way: Optional[bool]
     drawing: Optional[str] = "42"
+    theme: Optional[str] = "squeleton"
 
     @model_validator(mode="after")
     def entry_must_be_in_bound(self) -> Self:
@@ -27,11 +28,15 @@ class CheckedResult(BaseModel):
         return self
 
     @model_validator(mode="after")
-    def check_if_drawing_is_ok(self) -> Self:
+    def check_drawing_and_theme_attribute(self) -> Self:
         drawings_available = ["42", "smiley", "no_drawing", "pac-man"]
-        if self.drawing and self.drawing not in drawings_available:
+        theme_available = ["red", "green", "squeleton", "rgb"]
+        if self.drawing not in drawings_available:
             raise ValueError(f"The drawing {self.drawing} \
-don't exist, please chosse one among {drawings_available}")
+dosen't exist, please chosse one among {drawings_available}")
+        if self.theme not in theme_available:
+            raise ValueError(f"The theme {self.theme} \
+dosen't exist, please chosse one among {theme_available}")
         return self
 
     def assert_is_in_bound(self, pos: Tuple[int, int]):
@@ -179,6 +184,7 @@ class Parser:
             OptKeyParser("ANIMATE_GENERATION", BoolParser()),
             OptKeyParser("ANIMATE_SHORTEST_WAY", BoolParser()),
             OptKeyParser("DRAWING", IdentParser()),
+            OptKeyParser("THEME", IdentParser()),
         ]
         errors = []
         results = []

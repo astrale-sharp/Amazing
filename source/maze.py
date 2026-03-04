@@ -9,6 +9,7 @@ class MazeError(Exception):
 
 
 class Colors(Enum):
+    BG_GREY = '\033[40m'
     BG_RED = '\033[41m'
     BG_GREEN = '\033[42m'
     BG_ORANGE = '\033[43m'
@@ -16,11 +17,15 @@ class Colors(Enum):
     BG_PURPULE = '\033[45m'
     BG_LIGHT_BLUE = '\033[46m'
     BG_WHITE = '\033[47m'
+    WHITE = '\033[97m'
+    LIGHT_BLUE = '\033[96m'
     PURPULE = '\033[95m'
-    BLUE = '\033[4;94m'
+    BLUE = '\033[94m'
     YELLOW = '\033[93m'
     GREEN = '\033[92m'
     RED = '\033[91m'
+    GREY = '\033[90m'
+    LIGHT_GREY = '\033[89m'
     ENDC = '\033[0m'
     BOLD = '\033[1m'
 
@@ -37,22 +42,23 @@ class Maze:
         seed: Optional[int],
         animate_generation: Optional[bool] = False,
         animate_shortest_way: Optional[bool] = False,
-        drawing: Optional[str] = "42"
+        drawing: Optional[str] = "42",
+        theme: Optional[str] = "squeleton"
     ) -> None:
-        self.anim_gen = animate_generation
-        self.anim_res = animate_shortest_way
-        self.seed = seed
-        self.width = width
-        self.height = height
-        self.entry = [entry[1], entry[0]]
-        self.exit = [exit[1], exit[0]]
-        self.output_file = output_file
-        self.perfect = perfect
-        self.north = 0b1110
-        self.east = 0b1101
-        self.south = 0b1011
-        self.west = 0b0111
-        self.nb_cell_to_fill = width * height
+        self.anim_gen: bool = animate_generation
+        self.anim_res: bool = animate_shortest_way
+        self.seed: int = seed
+        self.width: int = width
+        self.height: int = height
+        self.entry: list[int] = [entry[1], entry[0]]
+        self.exit: list[int]= [exit[1], exit[0]]
+        self.output_file: str= output_file
+        self.perfect: bool = perfect
+        self.north: int = 0b1110
+        self.east: int = 0b1101
+        self.south: int = 0b1011
+        self.west: int = 0b0111
+        self.nb_cell_to_fill: int = width * height
         self.dir: list = [self.north, self.west, self.south, self.east]
         self.draws: dict[list[list]] = {"42": [[1, 0, 0, 0, 1, 1, 1],
                                                [1, 0, 0, 0, 0, 0, 1],
@@ -79,17 +85,47 @@ class Maze:
                                                     ],
                                         "no_drawing": [[]]
                                         }
-        self.drawing = self.draws[drawing]
+        self.drawing: list[list[int]] = self.draws[drawing]
+        self.theme: dict = self.choose_theme(theme)
         self.maze: list = self.init_maze()
 
-        def check_open_area(self, pos: list):
-            i = pos[0]
-            j = pos[0]
-            if i > 0 and j > 0 and i < self.height - 1 and j < self.width - 1:
-                weigth_square = 0
-                for x in range(-1, 2):
-                    for y in range(-1, 2):
-                        weigth_square += self.maze[i + x][j + y]
+    def choose_theme(self, theme: str) -> dict:
+        if theme == "red":
+            return {
+                "wall_color": Colors.RED.value + Colors.BOLD.value,
+                "draw_color": Colors.YELLOW.value + Colors.BOLD.value,
+                "entry_color": Colors.BG_GREEN.value,
+                "head_solver_color": Colors.BG_RED.value,
+                "tail_colver_color": Colors.BG_PURPULE.value,
+                "exit_color": Colors.BG_RED.value
+                }
+        elif theme == "green":
+            return {
+                "wall_color": Colors.GREEN.value + Colors.BOLD.value,
+                "draw_color": Colors.PURPULE.value + Colors.BOLD.value,
+                "entry_color": Colors.BG_GREEN.value,
+                "head_solver_color": Colors.BG_BLUE.value,
+                "tail_colver_color": Colors.BG_LIGHT_BLUE.value,
+                "exit_color": Colors.BG_RED.value
+            }
+        elif theme == "squeleton":
+            return {
+                "wall_color": Colors.WHITE.value + Colors.BOLD.value,
+                "draw_color": Colors.LIGHT_GREY.value + Colors.BOLD.value,
+                "entry_color": Colors.BG_GREEN.value,
+                "head_solver_color": Colors.BG_GREY.value,
+                "tail_colver_color": Colors.BG_GREY.value,
+                "exit_color": Colors.BG_RED.value
+            }
+        elif theme == "rgb":
+            return {
+                "wall_color": Colors.BLUE.value + Colors.BOLD.value,
+                "draw_color": Colors.GREEN.value + Colors.BOLD.value,
+                "entry_color": Colors.BG_GREEN.value,
+                "head_solver_color": Colors.BG_GREEN.value,
+                "tail_colver_color": Colors.BG_RED.value,
+                "exit_color": Colors.BG_RED.value
+            }
 
     def at(self, pos: list) -> int:
         value_cell: int = self.maze[pos[0]][pos[1]]
@@ -160,12 +196,12 @@ class Maze:
         convert:hex to print the maze in hexa (Mandatory)
                 Nothing to print the maze in ascii"""
         content = ""
-        wall_color = Colors.RED.value + Colors.BOLD.value
-        draw_color = Colors.YELLOW.value + Colors.BOLD.value
-        entry_color = Colors.BG_ORANGE.value
-        head_solver_color = Colors.BG_BLUE.value
-        tail_colver_color = Colors.BG_LIGHT_BLUE.value
-        exit_color = Colors.BG_RED.value
+        wall_color = self.theme['wall_color']
+        draw_color = self.theme['draw_color']
+        entry_color = self.theme['entry_color']
+        head_solver_color = self.theme['head_solver_color']
+        tail_colver_color = self.theme['tail_colver_color']
+        exit_color = self.theme['exit_color']
         if convert == "hex":
             hexa = [
                 "0",
