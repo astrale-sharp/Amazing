@@ -199,4 +199,5 @@ class Parser:
         pr = ParseResult()
         for k in results:
             k.apply(pr)
-        return CheckedResult(**pr.__dict__)
+        CheckedResult(**pr.__dict__)
+        return (pr.__dict__)
