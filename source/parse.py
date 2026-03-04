@@ -12,6 +12,9 @@ class CheckedResult(BaseModel):
     output_file: str
     perfect: bool
     seed: Optional[str]
+    animate_generation: Optional[bool]
+    animate_shortest_way: Optional[bool]
+    drawing: Optional[str] = "42"
 
     @model_validator(mode="after")
     def entry_must_be_in_bound(self) -> Self:
@@ -21,6 +24,14 @@ class CheckedResult(BaseModel):
             raise ValueError(f"Exit = {self.exit} is not in bounds")
         if self.entry == self.exit:
             raise ValueError("Entry and Exit must be different")
+        return self
+
+    @model_validator(mode="after")
+    def check_if_drawing_is_ok(self) -> Self:
+        drawings_available = ["42", "smiley", "no_drawing", "pac-man"]
+        if self.drawing and self.drawing not in drawings_available:
+            raise ValueError(f"The drawing {self.drawing} \
+don't exist, please chosse one among {drawings_available}")
         return self
 
     def assert_is_in_bound(self, pos: Tuple[int, int]):
@@ -167,6 +178,7 @@ class Parser:
             OptKeyParser("SEED", IdentParser()),
             OptKeyParser("ANIMATE_GENERATION", BoolParser()),
             OptKeyParser("ANIMATE_SHORTEST_WAY", BoolParser()),
+            OptKeyParser("DRAWING", IdentParser()),
         ]
         errors = []
         results = []

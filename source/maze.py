@@ -36,7 +36,8 @@ class Maze:
         perfect: bool,
         seed: Optional[int],
         animate_generation: Optional[bool] = False,
-        animate_shortest_way: Optional[bool] = False
+        animate_shortest_way: Optional[bool] = False,
+        drawing: Optional[str] = "42"
     ) -> None:
         self.anim_gen = animate_generation
         self.anim_res = animate_shortest_way
@@ -53,13 +54,32 @@ class Maze:
         self.west = 0b0111
         self.nb_cell_to_fill = width * height
         self.dir: list = [self.north, self.west, self.south, self.east]
-        self.drawing: list = [
-            [1, 0, 0, 0, 1, 1, 1],
-            [1, 0, 0, 0, 0, 0, 1],
-            [1, 1, 1, 0, 1, 1, 1],
-            [0, 0, 1, 0, 1, 0, 0],
-            [0, 0, 1, 0, 1, 1, 1],
-        ]
+        self.draws: dict[list[list]] = {"42": [[1, 0, 0, 0, 1, 1, 1],
+                                               [1, 0, 0, 0, 0, 0, 1],
+                                               [1, 1, 1, 0, 1, 1, 1],
+                                               [0, 0, 1, 0, 1, 0, 0],
+                                               [0, 0, 1, 0, 1, 1, 1],
+                                               ],
+                                        "smiley": [[1, 1, 0, 0, 0, 1, 1],
+                                                   [1, 1, 0, 0, 0, 1, 1],
+                                                   [0, 0, 0, 0, 0, 0, 0],
+                                                   [1, 0, 0, 0, 0, 0, 1],
+                                                   [1, 1, 0, 0, 0, 1, 1],
+                                                   [0, 1, 1, 1, 1, 1, 0]
+                                                   ],
+                                        "pac-man": [[0, 0, 1, 1, 1, 1, 1, 0],
+                                                    [0, 1, 1, 1, 1, 1, 1, 1],
+                                                    [1, 1, 1, 1, 1, 1, 1, 0],
+                                                    [1, 1, 1, 1, 1, 0, 0, 0],
+                                                    [1, 1, 1, 1, 0, 0, 0, 0],
+                                                    [1, 1, 1, 1, 1, 0, 0, 0],
+                                                    [1, 1, 1, 1, 1, 1, 1, 0],
+                                                    [0, 1, 1, 1, 1, 1, 1, 1],
+                                                    [0, 0, 1, 1, 1, 1, 1, 0]
+                                                    ],
+                                        "no_drawing": [[]]
+                                        }
+        self.drawing = self.draws[drawing]
         self.maze: list = self.init_maze()
 
         def check_open_area(self, pos: list):
@@ -115,9 +135,9 @@ class Maze:
                         == 1
                     ):
                         if [line, col] == self.entry:
-                            raise ValueError("Entry is in the drawing")
+                            raise ValueError(f"Entry = [{line},{col}] is in the drawing")
                         elif [line, col] == self.exit:
-                            raise ValueError("Exit is in the drawing")
+                            raise ValueError(f"Exit = [{line},{col}] is in the drawing")
                         maze[line][col] = 0b11111
                         self.nb_cell_to_fill -= 1
         else:
