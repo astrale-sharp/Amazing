@@ -51,8 +51,8 @@ class Maze:
         self.width: int = width
         self.height: int = height
         self.entry: list[int] = [entry[1], entry[0]]
-        self.exit: list[int]= [exit[1], exit[0]]
-        self.output_file: str= output_file
+        self.exit: list[int] = [exit[1], exit[0]]
+        self.output_file: str = output_file
         self.perfect: bool = perfect
         self.north: int = 0b1110
         self.east: int = 0b1101
@@ -171,9 +171,11 @@ class Maze:
                         == 1
                     ):
                         if [line, col] == self.entry:
-                            raise ValueError(f"Entry = [{line},{col}] is in the drawing")
+                            raise ValueError(f"Entry = [{line},{col}] \
+is in the drawing")
                         elif [line, col] == self.exit:
-                            raise ValueError(f"Exit = [{line},{col}] is in the drawing")
+                            raise ValueError(f"Exit = [{line},{col}] \
+is in the drawing")
                         maze[line][col] = 0b11111
                         self.nb_cell_to_fill -= 1
         else:
