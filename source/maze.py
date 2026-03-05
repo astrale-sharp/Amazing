@@ -1,6 +1,6 @@
 # from mlx import Mlx
 from typing import Any
-from vector2 import Vector2
+from source.vector2 import Vector2
 from enum import Enum
 
 
@@ -22,11 +22,10 @@ class Maze:
         self,
         height: int,
         width: int,
-        entry: Vector2,
-        exit: Vector2,
+        entry: list,
+        exit: list,
         output_file: str,
         perfect: bool,
-        cell_size: int = 50,
     ) -> None:
         self.width = width
         self.height = height
@@ -61,18 +60,18 @@ class Maze:
     def at(self, pos: Vector2) -> int:
         return self.maze[pos.y][pos.x]
 
-    def is_in_bound(self, pos: Vector2) -> bool:
+    def is_in_bound(self, pos: list) -> bool:
         return (
-            pos.y < self.height
-            and pos.y >= 0
-            and pos.x < self.width
-            and pos.x >= 0
+            pos[1] < self.height
+            and pos[1] >= 0
+            and pos[0] < self.width
+            and pos[0] >= 0
         )
 
-    def put_in_maze(self, pos: Vector2, value: int) -> None:
+    def put_in_maze(self, pos: list, value: int) -> None:
         # casse le mur value a la position pos
-        if self.is_in_bound(pos) and self.at(pos) < 0b11111:
-            self.maze[pos.y][pos.x] = self.at(pos) & value
+        if self.is_in_bound(pos) and self.maze[pos[1]][pos[0]] < 0b11111:
+            self.maze[pos[1]][pos[0]] = self.maze[pos[1]][pos[0]] & value
 
     def init_maze(self) -> list[list[int]]:
         """Init the maze, full of unexplored cells (only walls), and if

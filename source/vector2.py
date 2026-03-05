@@ -4,8 +4,8 @@ from typing_extensions import Self
 
 class Vector2:
     def __init__(self, x: int, y: int) -> None:
-        self.x = x
-        self.y = y
+        self.x: int = x
+        self.y: int = y
 
     def __str__(self) -> str:
         return f"Vector2({self.x}, {self.y})"
@@ -18,6 +18,14 @@ class Vector2:
                 )
             )
         return Vector2(self.x + rhs.x, self.y + rhs.y)
+
+    def __mul__(self, rhs: Any):
+        if isinstance(rhs, int):
+            return Vector2(int(self.x * rhs), int(self.y * rhs))
+
+        raise ValueError(
+            "* operator not supported between Vector2 and {}".format(type(rhs))
+        )
 
     def __sub__(self, rhs: Any):
         if not isinstance(rhs, Vector2):
@@ -37,10 +45,16 @@ class Vector2:
             )
         return rhs.x == self.x and rhs.y == self.y
 
-    def is_in_bounds(self, bounds: Self) -> bool:
+    def __repr__(self) -> str:
+        return str(self)
+
+    def as_tuple(self):
+        return (self.x, self.y)
+
+    def is_in_bounds(self, min_pos: Self, max_pos: Self) -> bool:
         return (
-            self.x >= 0
-            and self.x < bounds.x
-            and self.y >= 0
-            and self.y < bounds.y
+            self.x >= min_pos.x
+            and self.x < max_pos.x
+            and self.y >= min_pos.y
+            and self.y < max_pos.y
         )

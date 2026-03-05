@@ -1,4 +1,4 @@
-from .maze import Maze
+from source.maze import Maze
 import random
 
 class Walker:
