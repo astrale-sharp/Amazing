@@ -207,24 +207,7 @@ is in the drawing")
         tail_colver_color = self.theme['tail_colver_color']
         exit_color = self.theme['exit_color']
         if convert == "hex":
-            hexa = [
-                "0",
-                "1",
-                "2",
-                "3",
-                "4",
-                "5",
-                "6",
-                "7",
-                "8",
-                "9",
-                "A",
-                "B",
-                "C",
-                "D",
-                "E",
-                "F",
-            ]
+            hexa = "0123456789ABCDEF"
             maze: list[list] = [[] for _ in range(self.height + 1)]
             for line in range(self.height):
                 for col in range(self.width):
