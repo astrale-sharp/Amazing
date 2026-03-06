@@ -1,6 +1,6 @@
 from source.maze import Maze
 from source.vector2 import Vector2
-from random import random, shuffle
+from random import shuffle
 from typing import Self, List
 
 
@@ -38,7 +38,7 @@ class DisjointSet:
 
         if self == oth:
             return False
-        if self.rank > oth.rank:
+        if self.rank < oth.rank:
             self, oth = oth, self
         if self.rank == oth.rank:
             self.rank += 1
