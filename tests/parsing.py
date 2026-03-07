@@ -64,7 +64,7 @@ class ParsingTests(TestCase):
         try:
             Parser.parse(txt)
             self.fail("should fail with too large")
-        except ValidationError as v:
+        except ValueError as v:
             pass
 
     def test_outside(self):
@@ -78,7 +78,7 @@ class ParsingTests(TestCase):
         try:
             Parser.parse(txt)
             self.fail("should fail with outside")
-        except ValidationError as v:
+        except ValueError:
             pass
 
     def test_good_data(self):
@@ -99,7 +99,7 @@ class ParsingTests(TestCase):
             self.assertEqual(ret.perfect, True)
             self.assertEqual(ret.seed, None)
         except ValueError as v:
-            self.fail("should parse succesfully")
+            self.fail(f"should parse succesfully but {v}")
 
     def test_good_data_with_seed(self):
         txt = """WIDTH=7

@@ -15,7 +15,7 @@ def main():
     try:
         with open(sys.argv[1], 'r') as f:
             args = f.read()
-        args = Parser.parse(args)
+        args = vars(Parser.parse(args))
         maze = Maze(**args)
         walk = Walker(maze)
         walk.walk_and_fill()

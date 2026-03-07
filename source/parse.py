@@ -1,5 +1,4 @@
-from typing import Tuple, Any, Optional
-from typing_extensions import Self
+from typing import Tuple, Any, Self, Optional
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field, model_validator, ValidationError
 
@@ -11,14 +10,16 @@ class CheckedResult(BaseModel):
     exit: Tuple[int, int]
     output_file: str
     perfect: bool
-    seed: Optional[str]
-    animate_generation: Optional[bool] = False
-    animate_shortest_way: Optional[bool] = False
-    drawing: Optional[str] = "42"
-    theme: Optional[str] = "squeleton"
+    seed: Optional[str] = None
+    alt: bool = False
+    animate_generation: bool = False
+    animate_shortest_way: bool = False
+    interactive: bool = False
+    drawing: str = "42"
+    theme: str = "squeleton"
 
     @model_validator(mode="after")
-    def entry_must_be_in_bound(self) -> Self:
+    def entry_and_exit_must_be_in_bound(self) -> Self:
         if not self.assert_is_in_bound(self.entry):
             raise ValueError(f"Entry = {self.entry} is not in bounds")
         if not self.assert_is_in_bound(self.exit):
@@ -32,11 +33,19 @@ class CheckedResult(BaseModel):
         drawings_available = ["42", "smiley", "no_drawing", "pac-man"]
         theme_available = ["red", "green", "squeleton", "rgb"]
         if self.drawing not in drawings_available:
-            raise ValueError(f"The drawing {self.drawing} \
-dosen't exist, please chosse one among {drawings_available}")
+            raise ValueError(
+                "The drawing {} doesn't exist, \
+                    please choose one among {}".format(
+                    self.drawing, drawings_available
+                )
+            )
         if self.theme not in theme_available:
-            raise ValueError(f"The theme {self.theme} \
-dosen't exist, please chosse one among {theme_available}")
+            raise ValueError(
+                "The theme {} doesn't exist, \
+                    please choose one among {}".format(
+                    self.theme, theme_available
+                )
+            )
         return self
 
     def assert_is_in_bound(self, pos: Tuple[int, int]):
@@ -46,19 +55,6 @@ dosen't exist, please chosse one among {theme_available}")
             and pos[1] >= 0
             and pos[1] < self.height
         )
-
-
-class ParseResult:
-    width: int
-    height: int
-    entry: Tuple[int, int]
-    exit: Tuple[int, int]
-    output_file: str
-    perfect: bool
-    seed: Optional[str]
-
-    def __init__(self) -> None:
-        self.seed = None
 
 
 class ParseError:
@@ -75,7 +71,7 @@ class KeyParseResult:
         self.key_name = key_name
         self.value = value
 
-    def apply(self, pr: ParseResult):
+    def apply(self, pr: CheckedResult):
         setattr(pr, self.key_name.lower(), self.value)
 
 
@@ -180,6 +176,7 @@ class Parser:
             KeyParser("EXIT", TupleIntParser()),
             KeyParser("OUTPUT_FILE", IdentParser()),
             KeyParser("PERFECT", BoolParser()),
+            OptKeyParser("ALT", BoolParser()),
             OptKeyParser("SEED", IdentParser()),
             OptKeyParser("ANIMATE_GENERATION", BoolParser()),
             OptKeyParser("ANIMATE_SHORTEST_WAY", BoolParser()),
@@ -222,11 +219,11 @@ not recognized"))
             raise ValueError(
                 "\n".join(map(str, errors)) + sep + "\n".join(leftover)
             )
-        pr = ParseResult()
+        pr = CheckedResult.model_construct()
         for k in results:
             k.apply(pr)
         try:
-            CheckedResult(**pr.__dict__)
+            pr.model_validate(pr)
+            return pr
         except ValidationError as e:
-            raise ValueError(e.errors()[0]['msg'].replace("Value error, ", ""))
-        return (pr.__dict__)
+            raise ValueError(e)

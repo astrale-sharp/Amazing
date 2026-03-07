@@ -40,16 +40,17 @@ class Maze:
         output_file: str,
         perfect: bool,
         seed: Optional[int],
-        animate_generation: Optional[bool] = False,
-        animate_shortest_way: Optional[bool] = False,
-        interactive: Optional[bool] = False,
-        drawing: Optional[str] = "42",
-        theme: Optional[str] = "squeleton"
+        animate_generation: bool,
+        animate_shortest_way: bool,
+        interactive: bool,
+        drawing: str,
+        theme: str,
+        alt: bool
     ) -> None:
         self.interactive = interactive
         self.anim_gen: bool = animate_generation
         self.anim_res: bool = animate_shortest_way
-        self.seed: int = seed
+        self.seed: int | None = seed
         self.width: int = width
         self.height: int = height
         self.entry: list[int] = [entry[1], entry[0]]
