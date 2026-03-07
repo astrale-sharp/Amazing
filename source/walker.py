@@ -26,23 +26,27 @@ class DisjointSet:
     def at(cls, sets: List[List[Self]], pos: Vector2) -> Self:
         return sets[pos.y][pos.x]
 
-    def find(self):
-        while self != self.parent:
-            self.parent = self.parent.parent
-            self = self.parent
-        return self
+    @classmethod
+    def find(cls, sets: List[List[Self]], pos: Vector2) -> Self:
+        x = sets[pos.y][pos.x]
+        while x != x.parent:
+            x.parent = x.parent.parent
+            x = x.parent
+        return x
 
-    def merge(self, oth: Self, sets: List[List[Self]]):
-        self = self.find()
-        oth = oth.find()
-
-        if self == oth:
+    @classmethod
+    def merge(
+        cls, sets: List[List[Self]], pos1: Vector2, pos2: Vector2
+    ) -> bool:
+        x = cls.find(sets, pos1)
+        y = cls.find(sets, pos2)
+        if x is y:
             return False
-        if self.rank < oth.rank:
-            self, oth = oth, self
-        if self.rank == oth.rank:
-            self.rank += 1
-        self.parent = oth
+        if x.rank < y.rank:
+            x, y = y, x
+        if x.rank == y.rank:
+            x.rank += 1
+        x.parent = y
         return True
 
 
@@ -73,11 +77,7 @@ def kruskal(maze: Maze):
             continue
         if maze.maze[cells_dividing[0].y][cells_dividing[0].x] > 0b1111:
             continue
-        set1, set2 = (
-            sets[cells_dividing[0].y][cells_dividing[0].x],
-            sets[cells_dividing[1].y][cells_dividing[1].x],
-        )
-        if set1.merge(set2, sets):
+        if DisjointSet.merge(sets, cells_dividing[0], cells_dividing[1]):
             maze.put_in_maze((cells_dividing[0].y, cells_dividing[0].x), wall)
             rev = {
                 maze.east: maze.west,
