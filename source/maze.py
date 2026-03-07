@@ -89,6 +89,7 @@ class Maze:
                                         "no_drawing": [[]]
                                         }
         self.drawing: list[list[int]] = self.draws[drawing]
+        self.alt = alt
         self.theme: dict = self.choose_theme(theme)
         self.maze: list = self.init_maze()
 

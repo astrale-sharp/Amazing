@@ -1,5 +1,6 @@
 from source.maze import Maze
 from source.walker_pa import Walker
+from source.walker import kruskal
 from source.find_way import SolveMaze
 from source.parse import Parser
 from pydantic import ValidationError
@@ -17,8 +18,11 @@ def main():
             args = f.read()
         args = vars(Parser.parse(args))
         maze = Maze(**args)
-        walk = Walker(maze)
-        walk.walk_and_fill()
+        if maze.perfect and maze.alt:
+            kruskal(maze)
+        else:
+            walk = Walker(maze)
+            walk.walk_and_fill()
         content = maze.print_maze("hex")
         solvmaze = SolveMaze(maze)
         content += f"Entry: {args['entry']}\nExit: {args['exit']}\n"
