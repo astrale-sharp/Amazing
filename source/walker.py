@@ -55,10 +55,8 @@ def kruskal(maze: Maze):
     for y in range(maze.height):
         for x in range(maze.width):
             cell_walls = [
-                maze.west,
                 maze.east,
                 maze.north,
-                maze.south,
             ]
             walls.extend([(Vector2(x, y), w) for w in cell_walls])
     shuffle(walls)
