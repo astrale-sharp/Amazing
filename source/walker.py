@@ -46,7 +46,7 @@ class DisjointSet:
             x, y = y, x
         if x.rank == y.rank:
             x.rank += 1
-        x.parent = y
+        y.parent = x
         return True
 
 
