@@ -4,8 +4,8 @@ from .maze import Maze
 class SolveMaze:
     def __init__(self, maze: Maze):
         self.maze = maze
-        self.entry = self.maze.entry
-        self.exit = self.maze.exit
+        self.entry = [self.maze.config.entry[1], self.maze.config.entry[0]]
+        self.exit = [self.maze.config.exit[1], self.maze.config.exit[0]]
         self.pos_line = self.entry[0]
         self.pos_col = self.entry[1]
         self.explored = [self.entry]
@@ -45,9 +45,9 @@ class SolveMaze:
         '''Create a new matrix, describing the distance of maze's cell
         from the exit.'''
 
-        mat_star = [[self.maze.width * self.maze.height
-                     for _ in range(self.maze.width)]
-                    for _ in range(self.maze.height)]
+        mat_star = [[self.maze.config.width * self.maze.config.height
+                     for _ in range(self.maze.config.width)]
+                    for _ in range(self.maze.config.height)]
         self.pos_line = self.exit[0]
         self.pos_col = self.exit[1]
         count = 0
@@ -71,7 +71,7 @@ class SolveMaze:
         '''Travel in the matrix created by the djikstra algo, and output the
         direction taken by the solver to link the entry to the exit.'''
 
-        if self.maze.anim_res:
+        if self.maze.config.animate_shortest_way:
             print("\033c", end="")
         mat_star = self.djikstra_matrix()
         way = ""
@@ -86,7 +86,7 @@ class SolveMaze:
                 self.travel_in_maze(try_dir)
                 if mat_star[self.pos_line][self.pos_col] == init - 1:
                     self.maze.maze[self.pos_line][self.pos_col] += 32
-                    if self.maze.anim_res:
+                    if self.maze.config.animate_shortest_way:
                         self.maze.print_maze_on_terminal("Finding the shortest solution...")
                     self.maze.maze[self.pos_line][self.pos_col] += 64
                     if try_dir == self.maze.north:

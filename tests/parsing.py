@@ -1,6 +1,6 @@
 from unittest import TestCase
 from source.parse import Parser
-from pydantic import ValidationError
+from source.vector2 import Vector2
 
 
 class ParsingTests(TestCase):
@@ -89,17 +89,14 @@ class ParsingTests(TestCase):
                  OUTPUT_FILE=x
                  PERFECT=True
                  """
-        try:
-            ret = Parser.parse(txt)
-            self.assertEqual(ret.width, 7)
-            self.assertEqual(ret.height, 8)
-            self.assertEqual(ret.entry, (1, 2))
-            self.assertEqual(ret.exit, (3, 0))
-            self.assertEqual(ret.output_file, "x")
-            self.assertEqual(ret.perfect, True)
-            self.assertEqual(ret.seed, None)
-        except ValueError as v:
-            self.fail(f"should parse succesfully but {v}")
+        ret = Parser.parse(txt)
+        self.assertEqual(ret.width, 7)
+        self.assertEqual(ret.height, 8)
+        self.assertEqual(Vector2.from_iter(ret.entry), Vector2(1, 2))
+        self.assertEqual(Vector2.from_iter(ret.exit), Vector2(3, 0))
+        self.assertEqual(ret.output_file, "x")
+        self.assertEqual(ret.perfect, True)
+        self.assertEqual(ret.seed, None)
 
     def test_good_data_with_seed(self):
         txt = """WIDTH=7
@@ -110,18 +107,59 @@ class ParsingTests(TestCase):
                  PERFECT=True
                  SEED=eyyeyeye
                  """
-        try:
-            ret = Parser.parse(txt)
-            self.assertEqual(ret.width, 7)
-            self.assertEqual(ret.height, 8)
-            self.assertEqual(ret.entry, (1, 2))
-            self.assertEqual(ret.exit, (3, 0))
-            self.assertEqual(ret.output_file, "x")
-            self.assertEqual(ret.perfect, True)
-            self.assertEqual(ret.seed, "eyyeyeye")
-        except ValidationError as v:
-            print("HERE")
-            for k in v.errors():
-                print(k["msg"])
+        ret = Parser.parse(txt)
+        self.assertEqual(ret.seed, "eyyeyeye")
 
-            # self.fail(v)
+    def test_with_theme(self):
+        txt = """WIDTH=7
+                 HEIGHT=8
+                 ENTRY=1,2
+                 EXIT=3,0
+                 OUTPUT_FILE=x
+                 PERFECT=True
+                 THEME=rgb
+                 """
+        ret = Parser.parse(txt)
+        self.assertEqual(ret.theme, "rgb")
+
+    def test_with_invalid_theme(self):
+        txt = """WIDTH=7
+                 HEIGHT=8
+                 ENTRY=1,2
+                 EXIT=3,0
+                 OUTPUT_FILE=x
+                 PERFECT=True
+                 THEME=rgba
+                 """
+        try:
+            Parser.parse(txt)
+            self.fail("Should have failed with rgba invalid")
+        except ValueError:
+            pass
+
+    def test_with_drawing(self):
+        txt = """WIDTH=7
+                 HEIGHT=8
+                 ENTRY=1,2
+                 EXIT=3,0
+                 OUTPUT_FILE=x
+                 PERFECT=True
+                 DRAWING=42
+                 """
+        r = Parser.parse(txt)
+        self.assertEqual(r.drawing, "42")
+
+    def test_with_invalid_drawing(self):
+        txt = """WIDTH=7
+                 HEIGHT=8
+                 ENTRY=1,2
+                 EXIT=3,0
+                 OUTPUT_FILE=x
+                 PERFECT=True
+                 DRAWING=rgb
+                 """
+        try:
+            Parser.parse(txt)
+            self.fail("Should have failed with rgb invalid")
+        except ValueError:
+            pass

@@ -1,4 +1,5 @@
-from .maze import Maze
+from source.maze import Maze
+from source.vector2 import Vector2
 import random
 
 
@@ -26,8 +27,10 @@ class Walker:
             try_pos = [pos[0] + 1, pos[1]]
         elif wall_to_open == self.maze.west:
             try_pos = [pos[0], pos[1] - 1]
-        return (self.maze.is_in_bound(try_pos)
-                and self.maze.maze[try_pos[0]][try_pos[1]] == 0b1111)
+        return (
+            self.maze.is_in_bound(Vector2.from_iter(try_pos).inverted())
+            and self.maze.maze[try_pos[0]][try_pos[1]] == 0b1111
+        )
 
     def loop_the_path(self, wall_to_open: int, pos: list) -> bool:
         '''sensibly like 'is_a_possible_way', except this one
@@ -59,30 +62,39 @@ class Walker:
         ):
             try_pos = [pos[0], pos[1] - 1]
         if not try_pos:
-            return (False)
-        cond: bool = (self.maze.is_in_bound(try_pos)
-                      and self.maze.maze[try_pos[0]][try_pos[1]] < 0b1111)
-        return (cond)
+            return False
+        return (
+            self.maze.is_in_bound(Vector2.from_iter(try_pos).inverted())
+            and self.maze.maze[try_pos[0]][try_pos[1]] < 0b1111
+        )
 
     def update_dir(self, way_to_open: int) -> None:
         '''break the wall of the cell's neighboors
         way_to_open: int = the wall we want to break'''
 
         if way_to_open == self.maze.north:
-            self.maze.put_in_maze([self.pos_line - 1, self.pos_col],
-                                  self.maze.south)
+            self.maze.put_in_maze(
+                Vector2(self.pos_col, self.pos_line - 1), self.maze.south
+            )
             self.pos_line -= 1
         elif way_to_open == self.maze.south:
-            self.maze.put_in_maze([self.pos_line + 1, self.pos_col],
-                                  self.maze.north)
+            self.maze.put_in_maze(
+                Vector2(self.pos_col, self.pos_line + 1), self.maze.north
+            )
             self.pos_line += 1
         elif way_to_open == self.maze.west:
-            self.maze.put_in_maze([self.pos_line, self.pos_col - 1],
-                                  self.maze.east)
+            self.maze.put_in_maze(
+                Vector2(
+                    self.pos_col - 1,
+                    self.pos_line,
+                ),
+                self.maze.east,
+            )
             self.pos_col -= 1
         elif way_to_open == self.maze.east:
-            self.maze.put_in_maze([self.pos_line, self.pos_col + 1],
-                                  self.maze.west)
+            self.maze.put_in_maze(
+                Vector2(self.pos_col + 1, self.pos_line), self.maze.west
+            )
             self.pos_col += 1
         self.nb_cell_to_fill -= 1
 
@@ -111,22 +123,34 @@ class Walker:
                              x, [self.pos_line, self.pos_col])]
         while possible_ways:
             try_way = random.choice(possible_ways)
-            self.maze.put_in_maze([self.pos_line, self.pos_col], try_way)
+            self.maze.put_in_maze(
+                Vector2(self.pos_col, self.pos_line), try_way
+            )
             self.update_dir(try_way)
-            possible_ways = [x for x in self.maze.dir
-                             if self.is_a_possible_way(
-                                 x, [self.pos_line, self.pos_col])]
+            possible_ways = [
+                x
+                for x in self.maze.dir
+                if self.is_a_possible_way(x, [self.pos_line, self.pos_col])
+            ]
             path_length += 1
-        if not self.maze.perfect:
-            possible_ways = [x for x in self.maze.dir
-                             if self.loop_the_path(
-                                 x, [self.pos_line, self.pos_col])]
+        if not self.maze.config.perfect:
+            possible_ways = [
+                x
+                for x in self.maze.dir
+                if self.loop_the_path(x, [self.pos_line, self.pos_col])
+            ]
             if possible_ways:
                 try_way = random.choice(possible_ways)
                 self.nb_cell_to_fill += 1
-                self.maze.put_in_maze([self.pos_line, self.pos_col], try_way)
+                self.maze.put_in_maze(
+                    Vector2(
+                        self.pos_col,
+                        self.pos_line,
+                    ),
+                    try_way,
+                )
                 self.update_dir(try_way)
-        return (path_length)
+        return path_length
 
     def find_incomplete_cell(self, pos: list) -> list:
         '''checker, as the maze is randomly created, avoid that some parts are
@@ -134,26 +158,32 @@ class Walker:
             return the pos of cell that are still unexplored.
             pos: list = the position from which we start the check'''
 
-        for i in range(pos[0], self.maze.height):
+        for i in range(pos[0], self.maze.config.height):
             if pos[0] != self.line_checked:
                 start_col = 0
             else:
                 start_col = pos[1]
-            for j in range(start_col, self.maze.width):
+            for j in range(start_col, self.maze.config.width):
                 if (
                     self.maze.maze[i][j] < 0b1111
-                    and len([x for x in self.maze.dir
-                             if self.is_a_possible_way(x, [i, j])]) >= 1
+                    and len(
+                        [
+                            x
+                            for x in self.maze.dir
+                            if self.is_a_possible_way(x, [i, j])
+                        ]
+                    )
+                    >= 1
                 ):
-                    return ([i, j])
+                    return [i, j]
             self.line_checked = i + 1
-        return ([])
+        return []
 
     def walk_and_fill(self) -> None:
         '''travel in the maze, when an unexplored cell is encountered,
         draw a random path'''
 
-        if (self.maze.anim_gen):
+        if self.maze.config.animate_generation:
             print("\033c", end="")
         if self.nb_cell_to_fill == 0:
             return
@@ -161,9 +191,11 @@ class Walker:
         self.pos_col = 0
         last_check_pos = [self.pos_line, self.pos_col]
         while self.nb_cell_to_fill - 1 != 0:
-            if not [x for x in self.maze.dir
-                    if self.is_a_possible_way(
-                        x, [self.pos_line, self.pos_col])]:
+            if not [
+                x
+                for x in self.maze.dir
+                if self.is_a_possible_way(x, [self.pos_line, self.pos_col])
+            ]:
                 self.line_checked = last_check_pos[0]
                 last_check_pos = self.find_incomplete_cell(last_check_pos)
                 if not last_check_pos:
@@ -172,5 +204,5 @@ class Walker:
                 self.pos_col = last_check_pos[1]
             else:
                 self.draw_path()
-                if (self.maze.anim_gen):
+                if self.maze.config.animate_generation:
                     self.maze.print_maze_on_terminal("Generating the maze...")

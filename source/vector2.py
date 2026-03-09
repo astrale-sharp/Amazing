@@ -1,4 +1,5 @@
-from typing import Any, Tuple
+from typing import Any, Tuple, List
+from typing_extensions import Self
 
 
 class Vector2:
@@ -44,3 +45,10 @@ class Vector2:
 
     def as_tuple(self) -> Tuple[int, int]:
         return self.x, self.y
+
+    @classmethod
+    def from_iter(cls, tup: Tuple[int, int] | List[int]) -> Self:
+        return Vector2(tup[0], tup[1])
+
+    def inverted(self) -> Self:
+        return Vector2(self.y, self.x)
