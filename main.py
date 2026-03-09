@@ -16,19 +16,19 @@ def main():
     try:
         with open(sys.argv[1], 'r') as f:
             args = f.read()
-        args = vars(Parser.parse(args))
-        maze = Maze(**args)
-        if maze.perfect and maze.alt:
+        config = Parser.parse(args)
+        maze = Maze(config)
+        if maze.config.perfect and maze.config.alt:
             kruskal(maze)
         else:
             walk = Walker(maze)
             walk.walk_and_fill()
         content = maze.print_maze("hex")
         solvmaze = SolveMaze(maze)
-        content += f"Entry: {args['entry']}\nExit: {args['exit']}\n"
+        content += f"Entry: {config.entry}\nExit: {config.exit}\n"
         content += solvmaze.output_shortest_way()
 
-        if maze.interactive:
+        if maze.config.interactive:
             output_to_print = "e"
             maze.print_maze("1")
             count_path = 0
@@ -53,7 +53,7 @@ choice(1-3): """, end="")
                     maze.print_maze()
                 elif output_to_print != "3":
                     print("Input not recognised")
-        with open(maze.output_file, "w") as f:
+        with open(maze.config.output_file, "w") as f:
             f.write(content)
     except ValidationError as e:
         print(e)

@@ -1,9 +1,11 @@
-from typing import Tuple, Any, Self, Optional
+from typing import Tuple, Any, Optional, KeysView, List
+from typing_extensions import Self
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field, model_validator, ValidationError
+from source.graphics import drawings, themes
+from source.vector2 import Vector2
 
-
-class CheckedResult(BaseModel):
+class CheckedConfig(BaseModel):
     width: int = Field(ge=2, le=10_000)
     height: int = Field(ge=2, le=10_000)
     entry: Tuple[int, int]
@@ -20,9 +22,9 @@ class CheckedResult(BaseModel):
 
     @model_validator(mode="after")
     def entry_and_exit_must_be_in_bound(self) -> Self:
-        if not self.assert_is_in_bound(self.entry):
+        if not self.assert_is_in_bound(Vector2.from_iter(self.entry)):
             raise ValueError(f"Entry = {self.entry} is not in bounds")
-        if not self.assert_is_in_bound(self.exit):
+        if not self.assert_is_in_bound(Vector2.from_iter(self.exit)):
             raise ValueError(f"Exit = {self.exit} is not in bounds")
         if self.entry == self.exit:
             raise ValueError("Entry and Exit must be different")
@@ -48,12 +50,12 @@ class CheckedResult(BaseModel):
             )
         return self
 
-    def assert_is_in_bound(self, pos: Tuple[int, int]):
+    def assert_is_in_bound(self, pos: Vector2):
         return (
-            pos[0] >= 0
-            and pos[0] < self.width
-            and pos[1] >= 0
-            and pos[1] < self.height
+            pos.x >= 0
+            and pos.x < self.width
+            and pos.y >= 0
+            and pos.y < self.height
         )
 
 
@@ -71,7 +73,7 @@ class KeyParseResult:
         self.key_name = key_name
         self.value = value
 
-    def apply(self, pr: CheckedResult):
+    def apply(self, pr: CheckedConfig):
         setattr(pr, self.key_name.lower(), self.value)
 
 
@@ -133,18 +135,28 @@ class IdentParser(ArgParser):
     def parse(self, str: str, line_number: int) -> ParseError | str:
         if len(str) == 0 or str.isspace():
             return ParseError(line_number, f"`{str!r}` is empty \
-or space only, please enter a file name")
+or space only, please use a valid name")
         return str
 
 
 class BoolParser(ArgParser):
     def parse(self, str: str, line_number: int) -> ParseError | bool:
-        str = str.replace(" ", "")
+        str = str.strip().replace(" ", "")
         if str == "True":
             return True
         elif str == "False":
             return False
         return ParseError(line_number, f"`{str}` should be `True` or `False`")
+
+
+class KeysParser(ArgParser):
+    def __init__(self, allowed: KeysView) -> None:
+        self.allowed: List[str] = list(allowed)
+    def parse(self, str: str, line_number: int) -> ParseError | str:
+        str = str.strip().replace(" ", "")
+        if str not in self.allowed:
+            return ParseError(line_number, f"`{str}` is not in valid keys: {self.allowed}")
+        return str
 
 
 class Parser:
@@ -181,8 +193,8 @@ class Parser:
             OptKeyParser("ANIMATE_GENERATION", BoolParser()),
             OptKeyParser("ANIMATE_SHORTEST_WAY", BoolParser()),
             OptKeyParser("INTERACTIVE", BoolParser()),
-            OptKeyParser("DRAWING", IdentParser()),
-            OptKeyParser("THEME", IdentParser()),
+            OptKeyParser("DRAWING", KeysParser(drawings.keys())),
+            OptKeyParser("THEME", KeysParser(themes.keys())),
         ]
         errors = []
         results = []
@@ -219,7 +231,7 @@ not recognized"))
             raise ValueError(
                 "\n".join(map(str, errors)) + sep + "\n".join(leftover)
             )
-        pr = CheckedResult.model_construct()
+        pr = CheckedConfig.model_construct()
         for k in results:
             k.apply(pr)
         try:
