@@ -142,6 +142,7 @@ or space only, please use a valid name")
 
 
 class BoolParser(ArgParser):
+    allowed = ["True", "False"]
     def parse(self, str: str, line_number: int) -> ParseError | bool:
         str = str.strip().replace(" ", "")
         if str == "True":
@@ -151,7 +152,7 @@ class BoolParser(ArgParser):
         return ParseError(line_number, f"`{str}` should be `True` or `False`")
 
 
-class KeysParser(ArgParser):
+class DictKeysParser(ArgParser):
     def __init__(self, allowed: KeysView) -> None:
         self.allowed: List[str] = list(allowed)
 
@@ -184,23 +185,37 @@ class Parser:
     raises a ValueError if string is not valid.
     """
 
-    @staticmethod
-    def parse(txt: str) -> CheckedConfig:
-        extractors: list[KeyParser] = [
-            KeyParser("WIDTH", IntParser()),
-            KeyParser("HEIGHT", IntParser()),
-            KeyParser("ENTRY", TupleIntParser()),
-            KeyParser("EXIT", TupleIntParser()),
-            KeyParser("OUTPUT_FILE", IdentParser()),
+    extractors: list[KeyParser] = [
+        KeyParser("WIDTH", IntParser()),
+        KeyParser("HEIGHT", IntParser()),
+        KeyParser("ENTRY", TupleIntParser()),
+        KeyParser("EXIT", TupleIntParser()),
+        KeyParser("OUTPUT_FILE", IdentParser()),
+        KeyParser("PERFECT", BoolParser()),
+        OptKeyParser("ALT", BoolParser()),
+        OptKeyParser("SEED", IdentParser()),
+        OptKeyParser("ANIMATE_GENERATION", BoolParser()),
+        OptKeyParser("ANIMATE_SHORTEST_WAY", BoolParser()),
+        OptKeyParser("INTERACTIVE", BoolParser()),
+        OptKeyParser("DRAWING", DictKeysParser(drawings.keys())),
+        OptKeyParser("THEME", DictKeysParser(themes.keys())),
+    ]
+
+    @classmethod
+    def interactable_extractors(cls):
+        return [
             KeyParser("PERFECT", BoolParser()),
             OptKeyParser("ALT", BoolParser()),
             OptKeyParser("SEED", IdentParser()),
             OptKeyParser("ANIMATE_GENERATION", BoolParser()),
             OptKeyParser("ANIMATE_SHORTEST_WAY", BoolParser()),
-            OptKeyParser("INTERACTIVE", BoolParser()),
-            OptKeyParser("DRAWING", KeysParser(drawings.keys())),
-            OptKeyParser("THEME", KeysParser(themes.keys())),
+            OptKeyParser("DRAWING", DictKeysParser(drawings.keys())),
+            OptKeyParser("THEME", DictKeysParser(themes.keys())),
         ]
+
+    @classmethod
+    def parse(cls, txt: str) -> CheckedConfig:
+        extractors: list[KeyParser] = cls.extractors.copy()
         errors = []
         results = []
         for i, line in enumerate(map(str.strip, txt.splitlines())):

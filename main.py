@@ -2,7 +2,7 @@ from source.maze import Maze
 from source.walker_pa import Walker
 from source.walker import kruskal
 from source.find_way import SolveMaze
-from source.parse import Parser
+import source.parse as parsing
 from source.maze_checker import check_valid_maze
 import random
 from pydantic import ValidationError
@@ -10,123 +10,197 @@ import sys
 from time import time
 from source.graphics import themes
 
+
+def handle_parse_one(maze, options, user_input):
+    parser: parsing.KeyParser = options[user_input]
+    if not isinstance(parser, parsing.KeyParser):
+        raise TypeError(f"expected `KeyParser` got {type(parser)}")
+    res = None
+
+    if isinstance(parser.arg, parsing.DictKeysParser):
+        print(f"Enter the new value for {parser.key_name}:")
+        for i, opt in enumerate(parser.arg.allowed):
+            if isinstance(opt, str):
+                print(f"{i+1}- {opt}")
+        arg = input()
+        try:
+            arg = int(arg)
+            res = parser.arg.allowed[arg - 1]
+        except ValueError:
+            res = parser.arg.parse(arg, 0)
+        except IndexError:
+            input(f"ERROR: {arg} is out of bounds - press enter")
+    if isinstance(parser.arg, parsing.IdentParser):
+        arg = input(f"Enter valid identity string for {parser.key_name}: ")
+        res = parser.arg.parse(arg, 0)
+    if isinstance(parser.arg, parsing.BoolParser):
+        res = not getattr(maze.config, parser.key_name.lower())
+    if res is not None:
+        if isinstance(res, parsing.ParseError):
+            print(f"ERROR: {res.msg} - press enter")
+            input()
+        else:
+            setattr(maze.config, parser.key_name.lower(), res)
+            print("\033c", end="")
+            print(f"The maze with updated config:")
+            return True
+    return True
+
+
+def print_header(maze: Maze, solver: SolveMaze, generation_time, solving_time):
+    print("\033c", end="")
+    if not maze.can_draw_42():
+        print("ERROR: The maze is too small to be printed")
+    animation = (
+        "with animation "
+        if maze.config.animate_generation or maze.config.animate_shortest_way
+        else ""
+    )
+    print(f"Seed used: {maze.config.seed}")
+    print(f"Alt: {maze.config.alt}")
+    print(f"Perfect: {maze.config.perfect}")
+    print(
+        "Program {}took:\n{} secondes to generate the maze\n{} secondes to solve it".format(
+            animation, generation_time, solving_time
+        )
+    )
+    print("checker =", check_valid_maze(maze, solver))
+
+
+def handle_interaction(
+    maze: Maze, solver: SolveMaze, generation_time, solving_time
+):
+    """Returns False if you need to exit"""
+    print_header(maze, solver, generation_time, solving_time)
+    count_path = 0
+    if maze.config.animate_shortest_way:
+        count_path += 1
+        maze.print_maze()
+    else:
+        maze.print_maze("1")
+    options = [
+        "Re-generate a new maze",
+        "Show/hide the path",
+        *parsing.Parser.interactable_extractors(),
+        "Quit",
+    ]
+    user_input = None
+    while True:
+        print("==== A-Maze-ing ====")
+        for i, opt in enumerate(options):
+            if isinstance(opt, str):
+                print(f"{i+1}- {opt}")
+            elif isinstance(opt, parsing.KeyParser):
+                if isinstance(opt.arg, parsing.BoolParser):
+                    print(f"{i+1}- toggle {opt.key_name}")
+                else:
+                    print(f"{i+1}- set {opt.key_name}")
+            else:
+                raise TypeError
+
+        print(f"choice(1-{len(options)}):", end="")
+
+        try:
+            user_input = int(input()) - 1
+        except ValueError:
+            print("\033c", end="")
+            input("Input not recognised - press enter")
+            continue
+
+        # Quitting
+        if user_input == len(options) - 1:
+            return False
+
+        if user_input >= len(options):
+            print("\033c", end="")
+            print("Input not recognised")
+            continue
+        print("\033c", end="")
+        # Regenerating
+        if user_input == 0:
+            maze.config.seed = hex(random.randint(16**16, 16**17))
+            return True
+        elif user_input == 1:
+            if count_path % 2 == 1:
+                count_path += 1
+                print("Generated maze:")
+                maze.print_maze("1")
+            else:
+                count_path += 1
+                print("The shortest solution:")
+                maze.print_maze()
+        else:
+            if handle_parse_one(maze, options, user_input):
+                return True
+
+
 def main():
-    new_theme = None
     if len(sys.argv) > 2:
         print(
             "ERROR: Too many args,"
             " Please run python3 a_maze_ing <filename>.txt"
         )
         return
+    try:
+        with open(sys.argv[1], "r") as f:
+            arg = f.read()
+        config: parsing.CheckedConfig = parsing.Parser.parse(arg)
+    except FileNotFoundError:
+        print("File not found, ", end="")
+        print("please create a config.txt with the arguments:")
+        print(
+            """WIDTH=<int>
+                HEIGHT=<int>
+                ENTRY=<int>,<int>
+                EXIT=<int>,<int>
+                OUTPUT_FILE=<filename>
+                PERFECT=True|False
+                [SEED=<str>]
+                [ANIMATE_GENERATION=<bool>]
+                [ANIMATE_SHORTEST_WAY=<bool>]
+                  """
+        )
+        return
+    if config.seed is None:
+        config.seed = hex(random.randint(16**16, 16**17))
     while True:
+        random.seed(config.seed)
         try:
-            with open(sys.argv[1], 'r') as f:
-                args = f.read()
-            args = Parser.parse(args)
-            if new_theme:
-                args.theme = new_theme
             x = time()
-            maze = Maze(args)
-            if (maze.config.animate_generation):
+            maze = Maze(config)
+            if maze.config.animate_generation:
                 print("\033c", end="")
             if maze.config.perfect and maze.config.alt:
                 kruskal(maze)
             else:
                 walk = Walker(maze)
                 walk.walk_and_fill()
-            generation = time() - x
+            generation_time = time() - x
             content = maze.print_maze("hex")
             x = time()
-            solvmaze = SolveMaze(maze)
-            content += f"Entry: {args.entry}\nExit: {args.exit}\n"
-            content += solvmaze.output_shortest_way()
-            solving = time() - x
+            solver = SolveMaze(maze)
+            content += f"Entry: {config.entry}\nExit: {config.exit}\n"
+            content += solver.output_shortest_way()
+            solving_time = time() - x
             with open(maze.config.output_file, "w") as f:
                 f.write(content)
 
-            if maze.config.interactive:
-                print("\033c", end="")
-                if not maze.can_draw_42():
-                    print("ERROR: The maze is too small to be printed")
-                output_to_print = "e"
-                count_path = 0
-                if (
-                    maze.config.animate_generation
-                    or maze.config.animate_shortest_way
-                ):
-                    animation = "with animation "
-                else:
-                    animation = ""
-                print(f"Program {animation}took:\n\
-                {generation} secondes to generate the maze\n\
-                {solving} secondes to solve it")
-                print("checker =", check_valid_maze(maze, solvmaze))
-                if maze.config.animate_shortest_way:
-                    count_path += 1
-                    maze.print_maze()
-                else:
-                    maze.print_maze("1")
-                while output_to_print != "4":
-                    print("""==== A-Maze-ing ====
-    1- Re-generate a new maze
-    2- Show/hide the path
-    3- Change the theme
-    4- Quit
-    choice(1-4): """, end="")
-                    output_to_print = input()
-                    print("\033c", end="")
-                    if not maze.can_draw_42():
-                        print("ERROR: The maze is too small to be printed")
-                    if output_to_print == "1":
-                        break
-                    if output_to_print == "2" and count_path % 2 == 1:
-                        count_path += 1
-                        print("Generated maze:")
-                        maze.print_maze("1")
-                    elif output_to_print == "2" and count_path % 2 == 0:
-                        count_path += 1
-                        print("The shortest solution:")
-                        maze.print_maze()
-                    elif output_to_print == "3":
-                        print("Actual maze:")
-                        maze.print_maze()
-                        count_path = 1
-                        print("==== A-Maze-ing ====")
-                        theme = input("Enter the new theme among rgb, red, squeleton, green: ")
-                        if theme in themes.keys():
-                            maze.theme = themes[theme]
-                            new_theme = theme
-                            print("\033c", end="")
-                            print(f"The maze with the {theme} theme:")
-                            maze.print_maze()
-                        else:
-                            print(f"theme {theme} not recognised, back to default theme")
-                    elif output_to_print == "4":
-                        return
-                    elif output_to_print != "4":
-                        print("Input not recognised")
-            else:
-                return
+            if maze.config.interactive and handle_interaction(
+                maze, solver, generation_time, solving_time
+            ):
+                continue
+            return
         except ValidationError as e:
             print(e)
             return
-        except (ValueError) as e:
+        except ValueError as e:
             print("ERROR:", e)
             return
         except IndexError:
-            print("ERROR: No configuration txt given as argument. \
-    Please run python3 a_maze_ing <filename>.txt")
-            return
-        except FileNotFoundError:
-            print("File not found, ", end="")
-            print("please create a config.txt with the arguments:")
-            print("""    WIDTH=<int>
-        HEIGHT=<int>
-        ENTRY=<int>,<int>
-        EXIT=<int>,<int>
-        OUTPUT_FILE=<filename>
-        PERFECT=True|False
-        [SEED=<str>]""")
+            print(
+                "ERROR: No configuration txt given as argument. \
+    Please run python3 a_maze_ing <filename>.txt"
+            )
             return
 
 

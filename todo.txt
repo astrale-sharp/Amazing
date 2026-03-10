@@ -1,20 +1,19 @@
+[x] - changer seed en opt (astrale)
+[x] - gerer seed (astrale)
+[x] - changer dessin pendant interactive - menu de l'interactive (astrale)
+[x] parse: - correction: demande flags minuscules ou maj (ALT=True et alt=True) (astrale)
 main:
 - organiser main (fin a voir)
-- changer seed en opt (astrale)
 - renomer le main (a_maze_ing.py ou le truc dans le style) (gros travail en duo a venir)
-- changer dessin pendant interactive - menu de l'interactive (astrale)
 
-algo(maze et wlker et find_way) (pl)
+algo(maze et walker et find_way) (pl)
 - separer print et generation si possible (avec yield)
 
-parse: (astrale)
-- correction: demande flags minuscules ou maj (ALT=True et alt=True)
 
 tests: (astrale)
 - tester generation labyrinthe
 
 maze:
-- gerer seed (astrale)
 - opt: doubler taile maze pr meileur affichage (printmze) (pl)
 
 final:
