@@ -2,6 +2,10 @@
 [x] - gerer seed (astrale)
 [x] - changer dessin pendant interactive - menu de l'interactive (astrale)
 [x] parse: - correction: demande flags minuscules ou maj (ALT=True et alt=True) (astrale)
+[x] maze: - opt: doubler taile maze pr meileur affichage (printmze) (pl)
+
+- reparer animation chemin
+
 main:
 - organiser main (fin a voir)
 - renomer le main (a_maze_ing.py ou le truc dans le style) (gros travail en duo a venir)
@@ -13,8 +17,6 @@ algo(maze et walker et find_way) (pl)
 tests: (astrale)
 - tester generation labyrinthe
 
-maze:
-- opt: doubler taile maze pr meileur affichage (printmze) (pl)
 
 final:
 	rendu:
