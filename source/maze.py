@@ -1,6 +1,6 @@
-# from mlx import Mlx
-from typing import Optional
-from enum import Enum
+from source.vector2 import Vector2
+from source.parse import CheckedConfig
+from source.graphics import drawings, themes, Colors, Theme
 import time
 
 
@@ -8,144 +8,39 @@ class MazeError(Exception):
     pass
 
 
-class Colors(Enum):
-    BG_GREY = '\033[40m'
-    BG_RED = '\033[41m'
-    BG_GREEN = '\033[42m'
-    BG_ORANGE = '\033[43m'
-    BG_BLUE = '\033[44m'
-    BG_PURPULE = '\033[45m'
-    BG_LIGHT_BLUE = '\033[46m'
-    BG_WHITE = '\033[47m'
-    WHITE = '\033[97m'
-    LIGHT_BLUE = '\033[96m'
-    PURPULE = '\033[95m'
-    BLUE = '\033[94m'
-    YELLOW = '\033[93m'
-    GREEN = '\033[92m'
-    RED = '\033[91m'
-    GREY = '\033[90m'
-    LIGHT_GREY = '\033[89m'
-    ENDC = '\033[0m'
-    BOLD = '\033[1m'
-
-
 class Maze:
-    def __init__(
-        self,
-        height: int,
-        width: int,
-        entry: list,
-        exit: list,
-        output_file: str,
-        perfect: bool,
-        seed: Optional[int],
-        animate_generation: bool,
-        animate_shortest_way: bool,
-        interactive: bool,
-        drawing: str,
-        theme: str,
-        alt: bool
-    ) -> None:
-        self.interactive = interactive
-        self.anim_gen: bool = animate_generation
-        self.anim_res: bool = animate_shortest_way
-        self.seed: int | None = seed
-        self.width: int = width
-        self.height: int = height
-        self.entry: list[int] = [entry[1], entry[0]]
-        self.exit: list[int] = [exit[1], exit[0]]
-        self.output_file: str = output_file
-        self.perfect: bool = perfect
+    def __init__(self, config: CheckedConfig) -> None:
+        self.config = config
         self.north: int = 0b1110
         self.east: int = 0b1101
         self.south: int = 0b1011
         self.west: int = 0b0111
-        self.nb_cell_to_fill: int = width * height
+        self.nb_cell_to_fill: int = config.width * config.height
         self.dir: list = [self.north, self.west, self.south, self.east]
-        self.draws: dict[list[list]] = {"42": [[1, 0, 0, 0, 1, 1, 1],
-                                               [1, 0, 0, 0, 0, 0, 1],
-                                               [1, 1, 1, 0, 1, 1, 1],
-                                               [0, 0, 1, 0, 1, 0, 0],
-                                               [0, 0, 1, 0, 1, 1, 1],
-                                               ],
-                                        "smiley": [[1, 1, 0, 0, 0, 1, 1],
-                                                   [1, 1, 0, 0, 0, 1, 1],
-                                                   [0, 0, 0, 0, 0, 0, 0],
-                                                   [1, 0, 0, 0, 0, 0, 1],
-                                                   [1, 1, 0, 0, 0, 1, 1],
-                                                   [0, 1, 1, 1, 1, 1, 0]
-                                                   ],
-                                        "pac-man": [[0, 0, 1, 1, 1, 1, 1, 0],
-                                                    [0, 1, 1, 1, 1, 1, 1, 1],
-                                                    [1, 1, 1, 1, 1, 1, 1, 0],
-                                                    [1, 1, 1, 1, 1, 0, 0, 0],
-                                                    [1, 1, 1, 1, 0, 0, 0, 0],
-                                                    [1, 1, 1, 1, 1, 0, 0, 0],
-                                                    [1, 1, 1, 1, 1, 1, 1, 0],
-                                                    [0, 1, 1, 1, 1, 1, 1, 1],
-                                                    [0, 0, 1, 1, 1, 1, 1, 0]
-                                                    ],
-                                        "no_drawing": [[]]
-                                        }
-        self.drawing: list[list[int]] = self.draws[drawing]
-        self.alt = alt
-        self.theme: dict = self.choose_theme(theme)
+        self.drawing: list[list[int]] = drawings[config.drawing]
+        self.theme: Theme = themes[config.theme]
         self.maze: list = self.init_maze()
 
-    def choose_theme(self, theme: str) -> dict:
-        if theme == "red":
-            return {
-                "wall_color": Colors.RED.value + Colors.BOLD.value,
-                "draw_color": Colors.YELLOW.value + Colors.BOLD.value,
-                "entry_color": Colors.BG_GREEN.value,
-                "head_solver_color": Colors.BG_RED.value,
-                "tail_colver_color": Colors.BG_PURPULE.value,
-                "exit_color": Colors.BG_RED.value
-                }
-        elif theme == "green":
-            return {
-                "wall_color": Colors.GREEN.value + Colors.BOLD.value,
-                "draw_color": Colors.PURPULE.value + Colors.BOLD.value,
-                "entry_color": Colors.BG_GREEN.value,
-                "head_solver_color": Colors.BG_BLUE.value,
-                "tail_colver_color": Colors.BG_LIGHT_BLUE.value,
-                "exit_color": Colors.BG_RED.value
-            }
-        elif theme == "squeleton":
-            return {
-                "wall_color": Colors.WHITE.value + Colors.BOLD.value,
-                "draw_color": Colors.LIGHT_GREY.value + Colors.BOLD.value,
-                "entry_color": Colors.BG_GREEN.value,
-                "head_solver_color": Colors.BG_GREY.value,
-                "tail_colver_color": Colors.BG_LIGHT_BLUE.value,
-                "exit_color": Colors.BG_RED.value
-            }
-        elif theme == "rgb":
-            return {
-                "wall_color": Colors.BLUE.value + Colors.BOLD.value,
-                "draw_color": Colors.GREEN.value + Colors.BOLD.value,
-                "entry_color": Colors.BG_GREEN.value,
-                "head_solver_color": Colors.BG_GREEN.value,
-                "tail_colver_color": Colors.BG_RED.value,
-                "exit_color": Colors.BG_RED.value
-            }
-
-    def at(self, pos: list) -> int:
-        value_cell: int = self.maze[pos[0]][pos[1]]
+    def at(self, pos: Vector2) -> int:
+        value_cell: int = self.maze[pos.y][pos.x]
         return value_cell
 
-    def is_in_bound(self, pos: list) -> bool:
-        cond: bool = (pos[0] < self.height
-                      and pos[0] >= 0
-                      and pos[1] < self.width
-                      and pos[1] >= 0)
-        return (cond)
+    def set_cell(self, pos: Vector2, value: int):
+        self.maze[pos.y][pos.x] = value
 
-    def put_in_maze(self, pos: list, value: int) -> None:
+    def is_in_bound(self, pos: Vector2) -> bool:
+        cond: bool = (
+            pos.y < self.config.height
+            and pos.y >= 0
+            and pos.x < self.config.width
+            and pos.x >= 0
+        )
+        return cond
+
+    def put_in_maze(self, pos: Vector2, value: int) -> None:
         # casse le mur value a la position pos
         if self.is_in_bound(pos) and self.at(pos) < 0b11111:
-            self.maze[pos[0]][pos[1]] = self.at(pos) & value
+            self.set_cell(pos, self.at(pos) & value)
 
     def init_maze(self) -> list[list[int]]:
         """Init the maze, full of unexplored cells (only walls), and if
@@ -154,47 +49,65 @@ class Maze:
 
         line_draw = len(self.drawing)
         col_draw = len(self.drawing[0])
-        if self.width > 0 and self.height > 0:
+        if self.config.width > 0 and self.config.height > 0:
             maze = [
-                [0b1111 for _ in range(self.width)] for _ in range(self.height)
+                [0b1111 for _ in range(self.config.width)]
+                for _ in range(self.config.height)
             ]
             can_draw = self.can_draw_42()
-            for line in range(self.height):
-                for col in range(self.width):
+            if not can_draw:
+                print("ERROR: The maze is too small to be printed")
+            for line in range(self.config.height):
+                for col in range(self.config.width):
                     if (
                         can_draw
-                        and line >= int(self.height / 2 - line_draw / 2)
+                        and line >= int(self.config.height / 2 - line_draw / 2)
                         and line
-                        < line_draw + int(self.height / 2 - line_draw / 2)
-                        and col >= int(self.width / 2 - col_draw / 2)
-                        and col < col_draw + int(self.width / 2 - col_draw / 2)
+                        < line_draw
+                        + int(self.config.height / 2 - line_draw / 2)
+                        and col >= int(self.config.width / 2 - col_draw / 2)
+                        and col
+                        < col_draw + int(self.config.width / 2 - col_draw / 2)
                         and self.drawing[
                             line
-                            - int(self.height / 2 + line_draw - line_draw / 2)
-                        ][col - int(self.width / 2 + col_draw - col_draw / 2)]
+                            - int(
+                                self.config.height / 2
+                                + line_draw
+                                - line_draw / 2
+                            )
+                        ][
+                            col
+                            - int(
+                                self.config.width / 2 + col_draw - col_draw / 2
+                            )
+                        ]
                         == 1
                     ):
-                        if [line, col] == self.entry:
-                            raise ValueError(f"Entry = [{line},{col}] \
-is in the drawing")
-                        elif [line, col] == self.exit:
-                            raise ValueError(f"Exit = [{line},{col}] \
-is in the drawing")
+                        if [line, col] == self.config.entry:
+                            raise ValueError(
+                                "Entry = [{},{}] is in the drawing".format(
+                                    line, col
+                                )
+                            )
+                        elif [line, col] == self.config.exit:
+                            raise ValueError(
+                                "Exit = [{},{}] is in the drawing".format(
+                                    line, col
+                                )
+                            )
                         maze[line][col] = 0b11111
                         self.nb_cell_to_fill -= 1
         else:
-            raise MazeError(
-                "Invalid information:\
- width and height must be > 0"
-            )
+            raise MazeError("Invalid information:\
+ width and height must be > 0")
         return maze
 
     def can_draw_42(self) -> bool:
         """checks if the maze is tall enough to draw the drawing"""
 
         return (
-            len(self.drawing) <= self.height - 2
-            and len(self.drawing[0]) <= self.width - 2
+            len(self.drawing) <= self.config.height - 2
+            and len(self.drawing[0]) <= self.config.width - 2
         )
 
     def print_maze(self, convert: str | None = None) -> str:
@@ -202,59 +115,73 @@ is in the drawing")
         convert:hex to print the maze in hexa (Mandatory)
                 Nothing to print the maze in ascii"""
         content = ""
-        wall_color = self.theme['wall_color']
-        draw_color = self.theme['draw_color']
-        entry_color = self.theme['entry_color']
-        head_solver_color = self.theme['head_solver_color']
-        tail_colver_color = self.theme['tail_colver_color']
-        exit_color = self.theme['exit_color']
         if convert == "hex":
             hexa = "0123456789ABCDEF"
-            maze: list[list] = [[] for _ in range(self.height + 1)]
-            for line in range(self.height):
-                for col in range(self.width):
+            maze: list[list] = [[] for _ in range(self.config.height + 1)]
+            for line in range(self.config.height):
+                for col in range(self.config.width):
                     maze[line].append(hexa[self.maze[line][col] % 16])
             for tab in maze:
                 for cell in tab:
-                    content += (cell)
-                content += ("\n")
+                    content += cell
+                content += "\n"
         else:
             print(" ", end="")
-            for _ in range(self.width):
-                print(wall_color + "__" + Colors.ENDC.value, end="")
-            print(wall_color + "\n" + Colors.ENDC.value, end="")
-            for line in range(self.height):
-                print(Colors.ENDC.value + wall_color + "|"
-                      + Colors.ENDC.value, end="")
-                for col in range(self.width):
+            for _ in range(self.config.width):
+                print(self.theme.wall_color + "__" + Colors.ENDC.value, end="")
+            print(self.theme.wall_color + "\n" + Colors.ENDC.value, end="")
+            for line in range(self.config.height):
+                print(
+                    Colors.ENDC.value
+                    + self.theme.wall_color
+                    + "|"
+                    + Colors.ENDC.value,
+                    end="",
+                )
+                for col in range(self.config.width):
                     cell = self.maze[line][col]
                     if cell == 0b11111:
-                        print(draw_color + "##" +
-                              Colors.ENDC.value, end="")
+                        print(
+                            self.theme.draw_color + "##" + Colors.ENDC.value,
+                            end="",
+                        )
                     else:
-                        if [line, col] == self.entry:
-                            print(entry_color, end="")
+                        if (col, line) == self.config.entry:
+                            print(self.theme.entry_color, end="")
                         if not convert:
                             if cell >> 6 & 1 == 1:
-                                print(tail_colver_color, end="")
+                                print(self.theme.tail_solver_color, end="")
                             elif cell >> 5 & 1 == 1:
-                                print(head_solver_color, end="")
-                        if [line, col] == self.exit:
-                            print(exit_color, end="")
+                                print(self.theme.head_solver_color, end="")
+                        if (col, line) == self.config.exit:
+                            print(self.theme.exit_color, end="")
                         if (cell >> 2) & 1 == 1:
-                            print(wall_color + "_", end="")
+                            print(self.theme.wall_color + "_", end="")
                         else:
-                            print(wall_color + " ", end="")
+                            print(self.theme.wall_color + " ", end="")
                         if cell >> 1 & 1 == 1:
-                            print(Colors.ENDC.value + wall_color
-                                  + "|" + Colors.ENDC.value, end="")
+                            print(
+                                Colors.ENDC.value
+                                + self.theme.wall_color
+                                + "|"
+                                + Colors.ENDC.value,
+                                end="",
+                            )
                         else:
                             if (cell >> 2) & 1 == 1:
-                                print(wall_color
-                                      + "_" + Colors.ENDC.value, end="")
+                                print(
+                                    self.theme.wall_color
+                                    + "_"
+                                    + Colors.ENDC.value,
+                                    end="",
+                                )
                             else:
-                                print(wall_color
-                                      + " " + Colors.ENDC.value, end="")
+                                print(
+                                    self.theme.wall_color
+                                    + " "
+                                    + Colors.ENDC.value,
+                                    end="",
+                                )
                 print("\n", end="")
             print(" ", end="")
             print("\n", end="")
@@ -264,31 +191,45 @@ is in the drawing")
         draw_line = len(self.drawing)
         draw_col = len(self.drawing)
         can_draw = self.can_draw_42()
-        for line in range(self.height):
-            for col in range(self.width):
+        for line in range(self.config.height):
+            for col in range(self.config.width):
                 # dessine le 42 pendant le parcours du tableau
                 if (
                     can_draw
-                    and line >= int(self.height / 2) - int(draw_line/2)
-                    and line < len(self.drawing) +
-                    int(self.height / 2) - int(draw_line/2)
-                    and col >= int(self.width / 2) - int(draw_col/2)
-                    and col < len(self.drawing[0]) +
-                    int(self.width / 2) - int(draw_col/2)
-                    and self.drawing[line - int(self.height / 2) +
-                                     draw_line - int(draw_line/2)][
-                        col - int(self.width / 2) + draw_col - int(draw_col/2)
+                    and line
+                    >= int(self.config.height / 2) - int(draw_line / 2)
+                    and line
+                    < len(self.drawing)
+                    + int(self.config.height / 2)
+                    - int(draw_line / 2)
+                    and col >= int(self.config.width / 2) - int(draw_col / 2)
+                    and col
+                    < len(self.drawing[0])
+                    + int(self.config.width / 2)
+                    - int(draw_col / 2)
+                    and self.drawing[
+                        line
+                        - int(self.config.height / 2)
+                        + draw_line
+                        - int(draw_line / 2)
+                    ][
+                        col
+                        - int(self.config.width / 2)
+                        + draw_col
+                        - int(draw_col / 2)
                     ]
                     == 1
                 ):
-                    if [line, col] == self.entry:
+                    if (col, line) == self.config.entry:
                         raise ValueError("Entry can't be in the 42 pattern")
-                    if [line, col] == self.exit:
+                    if [line, col] == self.config.exit:
                         raise ValueError("Exit can't be in the 42 pattern")
                     self.maze[line][col] = 0b11111
 
     def print_maze_on_terminal(self, msg: str):
         print("\033[H")
+        if not self.can_draw_42():
+            print("ERROR: The maze is too small to be printed")
         print(msg)
         self.print_maze()
-        time.sleep(1 / ((max(self.height, self.width))))
+        time.sleep(1 / ((max(self.config.height, self.config.width))))
