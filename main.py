@@ -64,7 +64,6 @@ def print_header(maze: Maze, solver: SolveMaze, generation_time, solving_time):
             animation, generation_time, solving_time
         )
     )
-    print("checker =", check_valid_maze(maze, solver))
 
 
 def handle_interaction(
@@ -75,9 +74,9 @@ def handle_interaction(
     count_path = 0
     if maze.config.animate_shortest_way:
         count_path += 1
-        maze.print_maze()
-    else:
         maze.print_maze("1")
+    else:
+        maze.print_maze()
     options = [
         "Re-generate a new maze",
         "Show/hide the path",
@@ -124,11 +123,11 @@ def handle_interaction(
             if count_path % 2 == 1:
                 count_path += 1
                 print("Generated maze:")
-                maze.print_maze("1")
+                maze.print_maze()
             else:
                 count_path += 1
                 print("The shortest solution:")
-                maze.print_maze()
+                maze.print_maze("1")
         else:
             if handle_parse_one(maze, options, user_input):
                 return True
@@ -158,8 +157,11 @@ def main():
                 [SEED=<str>]
                 [ANIMATE_GENERATION=<bool>]
                 [ANIMATE_SHORTEST_WAY=<bool>]
-                  """
+                """
         )
+        return
+    except ValueError as e:
+        print(e)
         return
     if config.seed is None:
         config.seed = hex(random.randint(16**16, 16**17))

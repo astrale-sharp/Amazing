@@ -52,6 +52,48 @@ class ParsingTests(TestCase):
             self.fail("should fail with bas bool")
         except ValueError as v:
             pass
+    
+    def test_too_low_width_value(self):
+        txt = """WIDTH=1
+                 HEIGHT=12
+                 ENTRY=6,7
+                 EXIT=0,9
+                 OUTPUT_FILE=x
+                 PERFECT=True
+                 """
+        try:
+            Parser.parse(txt)
+            self.fail("should fail with bad int value")
+        except ValueError as v:
+            pass
+    
+    def test_negative_width_value(self):
+        txt = """WIDTH=-10
+                 HEIGHT=12
+                 ENTRY=6,7
+                 EXIT=0,9
+                 OUTPUT_FILE=x
+                 PERFECT=True
+                 """
+        try:
+            Parser.parse(txt)
+            self.fail("should fail with bad int value")
+        except ValueError as v:
+            pass
+
+    def test_negative_height_value(self):
+        txt = """WIDTH=10
+                 HEIGHT=-12
+                 ENTRY=6,7
+                 EXIT=0,9
+                 OUTPUT_FILE=x
+                 PERFECT=True
+                 """
+        try:
+            Parser.parse(txt)
+            self.fail("should fail with bad int value")
+        except ValueError as v:
+            pass
 
     def test_too_big(self):
         txt = """WIDTH=14000
@@ -154,6 +196,30 @@ class ParsingTests(TestCase):
                  OUTPUT_FILE=x
                  PERFECT=True
                  THEME=rgb
+                 """
+        ret = Parser.parse(txt)
+        self.assertEqual(ret.theme, "rgb")
+    
+    def test_with_lowercase(self):
+        txt = """width=7
+                 height=8
+                 entry=1,2
+                 exit=3,0
+                 output_file=x
+                 perfect=True
+                 theme=rgb
+                 """
+        ret = Parser.parse(txt)
+        self.assertEqual(ret.theme, "rgb")
+
+    def test_with_spaces(self):
+        txt = """WIDTH= 7
+                 HEIGHT= 8
+                 ENTRY= 1 , 2
+                 EXIT= 3,0
+                 OUTPUT_FILE= x
+                 PERFECT=  True
+                 THEME= rgb
                  """
         ret = Parser.parse(txt)
         self.assertEqual(ret.theme, "rgb")

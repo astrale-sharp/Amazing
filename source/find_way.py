@@ -96,7 +96,7 @@ class SolveMaze:
                     self.maze.maze[self.pos_line][self.pos_col] += 32
                     if self.maze.config.animate_shortest_way:
                         self.maze.print_maze_on_terminal(
-                            "Finding the shortest solution..."
+                            "Finding the shortest solution...", True, "1"
                         )
                     self.maze.maze[self.pos_line][self.pos_col] += 64
                     if try_dir == self.maze.north:

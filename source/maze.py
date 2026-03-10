@@ -261,7 +261,7 @@ class Maze:
                                                   + "  " + Colors.ENDC.value,
                                                   end="")
                                         else:
-                                            print(" ", end="")
+                                            print("  ", end="")
                                     else:
                                         print("  ", end="")
                                 else:
@@ -270,11 +270,11 @@ class Maze:
             print()
         return content
 
-    def print_maze_on_terminal(self, msg: str, sleep=True):
+    def print_maze_on_terminal(self, msg: str, sleep=True, convert=None):
         print("\033[H")
         if not self.can_draw_42():
             print("ERROR: The maze is too small to be printed")
         print(msg)
-        self.print_maze()
+        self.print_maze(convert)
         if sleep:
             time.sleep(1 / ((max(self.config.height, self.config.width))))

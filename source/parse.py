@@ -255,7 +255,7 @@ not recognized"))
         for k in results:
             k.apply(pr)
         try:
-            pr.model_validate(pr)
+            pr = CheckedConfig(**vars(pr))
             return pr
         except ValidationError as e:
-            raise ValueError(e)
+            raise ValueError(e.errors()[0]['msg'])
