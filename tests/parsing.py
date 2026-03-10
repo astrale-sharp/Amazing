@@ -98,6 +98,26 @@ class ParsingTests(TestCase):
         self.assertEqual(ret.perfect, True)
         self.assertEqual(ret.seed, None)
 
+
+    def test_good_data_with_alt(self):
+        txt = """WIDTH=7
+                 HEIGHT=8
+                 ENTRY=1,2
+                 EXIT=3,0
+                 OUTPUT_FILE=x
+                 PERFECT=True
+                 ALT=True
+                 """
+        ret = Parser.parse(txt)
+        self.assertEqual(ret.width, 7)
+        self.assertEqual(ret.height, 8)
+        self.assertEqual(Vector2.from_iter(ret.entry), Vector2(1, 2))
+        self.assertEqual(Vector2.from_iter(ret.exit), Vector2(3, 0))
+        self.assertEqual(ret.output_file, "x")
+        self.assertEqual(ret.perfect, True)
+        self.assertEqual(ret.seed, None)
+        self.assertEqual(ret.alt, True)
+
     def test_good_data_with_seed(self):
         txt = """WIDTH=7
                  HEIGHT=8
@@ -109,6 +129,7 @@ class ParsingTests(TestCase):
                  """
         ret = Parser.parse(txt)
         self.assertEqual(ret.seed, "eyyeyeye")
+
 
     def test_with_theme(self):
         txt = """WIDTH=7
