@@ -90,7 +90,7 @@ class KeyParser:
         self.arg = arg
 
     def accepts(self, line: str):
-        return line.startswith(f"{self.key_name}=")
+        return line.upper().startswith(f"{self.key_name}=")
 
     def parse(
         self, line: str, line_number: int
