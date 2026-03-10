@@ -134,6 +134,7 @@ class TupleIntParser(ArgParser):
 
 class IdentParser(ArgParser):
     def parse(self, str: str, line_number: int) -> ParseError | str:
+        str = str.strip()
         if len(str) == 0 or str.isspace():
             return ParseError(line_number, f"`{str!r}` is empty \
 or space only, please use a valid name")
