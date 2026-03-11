@@ -1,5 +1,14 @@
 [build-system]
-requires = ["hatchling >= 1.26", "build==1.4.0", "flake8==7.3.0", "mypy==1.19.1"]
+requires = ["hatchling >= 1.26",
+            "build==1.4.0",
+            "flake8==7.3.0",
+            "mypy==1.19.1",
+            "pydantic==2.12.5",
+            "pydantic_core==2.41.5",
+            "typing==3.7.4.3",
+            "typing-inspection==0.4.2",
+            "typing_extensions==4.15.0"]
+
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
@@ -14,7 +23,6 @@ authors = [
   { name="acercy", email="acercy@example.com" },
 ]
 description = ""
-readme = "README.md"
 
 #[project.urls]
 #Homepage = ""
