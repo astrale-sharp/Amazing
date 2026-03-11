@@ -9,9 +9,8 @@ class SolveMaze:
         self.pos_line = self.entry[0]
         self.pos_col = self.entry[1]
         self.explored = [self.entry]
-        self.perfect_error = []
         self.is_in_bound = self.maze.is_in_bound
-        self.mat_star = None
+        self.mat_star: list[list[int]] = []
 
     def travel_in_maze(self, dir: int) -> None:
         """Take an int (north 0b0111, south 0b1101 etc...) and change the pos
@@ -27,7 +26,7 @@ class SolveMaze:
         elif dir == self.maze.east:
             self.pos_col += 1
 
-    def decomp_cell(self, cell: int) -> list:
+    def decomp_cell(self, cell: int) -> list[int]:
         """tells which walls of the current cell is open
         cell: int = an argument of the maze (ex: maze[line][col])
         --> Usefull to know wich way is open and ok to moove"""
