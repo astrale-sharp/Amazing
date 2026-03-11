@@ -1,6 +1,6 @@
 from source.maze import Maze
 from source.vector2 import Vector2
-from random import shuffle
+from random import shuffle, choice
 from typing import List, Any
 
 
@@ -46,6 +46,23 @@ class DisjointSet:
         return True
 
 
+def decomp_cell(maze: Maze, cell: int) -> list:
+    """tells which walls of the current cell is open
+    cell: int = an argument of the maze (ex: maze[line][col])
+    --> Usefull to know wich way is open and ok to moove"""
+
+    cell_open = []
+    if cell & 1 == 0:
+        cell_open.append(maze.north)
+    if cell >> 1 & 1 == 0:
+        cell_open.append(maze.east)
+    if cell >> 2 & 1 == 0:
+        cell_open.append(maze.south)
+    if cell >> 3 & 1 == 0:
+        cell_open.append(maze.west)
+    return cell_open
+
+
 def kruskal(maze: Maze):
     walls = []
     sets: List[List[DisjointSet]] = [
@@ -82,3 +99,33 @@ def kruskal(maze: Maze):
             maze.put_in_maze(cells_dividing[1], rev[wall])
             if maze.config.animate_generation:
                 maze.print_maze_on_terminal("Kruskal generation...", False)
+    if not maze.config.perfect:
+        count = 0
+        shuffle(walls)
+        for pos, wall in walls:
+            if count < max(maze.config.height, maze.config.width):
+                cell_open_to = decomp_cell(maze, wall)
+                if len(cell_open_to) < 2 and maze.maze[pos.y][pos.x] < 0b1111:
+                    open_wall = [x for x in maze.dir if x not in cell_open_to]
+                    shuffle(open_wall)
+                    wall = choice(open_wall)
+                    next_cell = pos + get_direction(maze, wall)
+                    if (
+                        maze.is_in_bound(next_cell)
+                        and maze.maze[next_cell.y]
+                        [next_cell.x] < 0b1111
+                    ):
+                        maze.put_in_maze(pos, wall)
+                        rev = {
+                            maze.east: maze.west,
+                            maze.west: maze.east,
+                            maze.south: maze.north,
+                            maze.north: maze.south,
+                        }
+                        maze.put_in_maze(next_cell, rev[wall])
+                        count += 1
+                    if maze.config.animate_generation:
+                        maze.print_maze_on_terminal("Kruskal generation...",
+                                                    False)
+            else:
+                break
