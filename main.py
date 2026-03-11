@@ -4,7 +4,6 @@ from source.walker import kruskal
 from source.find_way import SolveMaze
 import source.parse as parsing
 import random
-from pydantic import ValidationError
 import sys
 from time import time
 from typing import Any
@@ -140,26 +139,16 @@ def main() -> None:
         )
         return
     try:
-        with open(sys.argv[1], "r") as f:
-            arg = f.read()
-        config: parsing.CheckedConfig = parsing.Parser.parse(arg)
+        filename = sys.argv[1]
     except IndexError:
-        print("ERROR: No configuration txt given as argument. \n\
-       Please run python3 a_maze_ing <filename>.txt")
+        print("ERROR: No configuration txt given as argument.")
+        print("Please run python3 a_maze_ing <filename>.txt")
         return
-    except (FileNotFoundError):
+    try:
+        with open(filename, "r") as f:
+            arg = f.read()
+    except FileNotFoundError:
         print("File not found, ", end="")
-        print("please create a config.txt with the arguments:")
-        print("""WIDTH=<int>
-                HEIGHT=<int>
-                ENTRY=<int>,<int>
-                EXIT=<int>,<int>
-                OUTPUT_FILE=<filename>
-                PERFECT=True|False
-                [SEED=<str>]
-                [ANIMATE_GENERATION=<bool>]
-                [ANIMATE_SHORTEST_WAY=<bool>]
-                """)
         return
     try:
         config: parsing.CheckedConfig = parsing.Parser.parse(arg)
@@ -172,36 +161,29 @@ def main() -> None:
         config.seed = hex(random.randint(16**16, 16**17))
     while True:
         random.seed(config.seed)
-        try:
-            x = time()
-            maze = Maze(config)
-            if maze.config.animate_generation:
-                print("\033c", end="")
-            if maze.config.alt:
-                kruskal(maze)
-            else:
-                walk = Walker(maze)
-                walk.walk_and_fill()
-            generation_time = time() - x
-            content = maze.print_maze("hex")
-            x = time()
-            solver = SolveMaze(maze)
-            content += f"Entry: {config.entry}\nExit: {config.exit}\n"
-            content += solver.output_shortest_way()
-            solving_time = time() - x
-            with open(maze.config.output_file, "w") as f:
-                f.write(content)
-            if maze.config.interactive and handle_interaction(
-                maze, solver, generation_time, solving_time
-            ):
-                continue
-            return
-        except ValidationError as e:
-            print(e)
-            return
-        except ValueError as e:
-            print("ERROR:", e)
-            return
+        x = time()
+        maze = Maze(config)
+        if maze.config.animate_generation:
+            print("\033c", end="")
+        if maze.config.perfect and maze.config.alt:
+            kruskal(maze)
+        else:
+            walk = Walker(maze)
+            walk.walk_and_fill()
+        generation_time = time() - x
+        content = maze.print_maze("hex")
+        x = time()
+        solver = SolveMaze(maze)
+        content += f"Entry: {config.entry}\nExit: {config.exit}\n"
+        content += solver.output_shortest_way()
+        solving_time = time() - x
+        with open(maze.config.output_file, "w") as f:
+            f.write(content)
+        if maze.config.interactive and handle_interaction(
+            maze, solver, generation_time, solving_time
+        ):
+            continue
+        return
 
 
 if __name__ == "__main__":
