@@ -21,13 +21,18 @@ def handle_parse_one(maze: Maze, options: list, user_input: int) -> bool:
             if isinstance(opt, str):
                 print(f"{i+1}- {opt}")
         arg = input()
-        try:
-            int_arg = int(arg)
-            res = parser.arg.allowed[int_arg - 1]
-        except ValueError:
-            res = parser.arg.parse(arg, 0)
-        except IndexError:
-            input(f"ERROR: {arg} is out of bounds - press enter")
+        res = parser.arg.parse(arg, 0)
+        if isinstance(res, parsing.ParseError):
+            is_int = False
+            try:
+                int_arg = int(arg)
+                is_int = True
+                if int_arg - 1 < 0:
+                    raise IndexError
+                res = parser.arg.allowed[int_arg - 1]
+            except (ValueError, IndexError):
+                if is_int:
+                    print(f"ERROR: {arg} is out of bounds")
     if isinstance(parser.arg, parsing.IdentParser):
         arg = input(f"Enter valid identity string for {parser.key_name}: ")
         res = parser.arg.parse(arg, 0)
@@ -46,7 +51,7 @@ def handle_parse_one(maze: Maze, options: list, user_input: int) -> bool:
 
 
 def print_header(
-    maze: Maze, solver: SolveMaze, generation_time: float, solving_time: float
+    maze: Maze, generation_time: float, solving_time: float
 ) -> None:
     print("\033c", end="")
     if not maze.can_draw_42():
@@ -65,10 +70,10 @@ def print_header(
 
 
 def handle_interaction(
-    maze: Maze, solver: SolveMaze, generation_time: float, solving_time: float
+    maze: Maze, generation_time: float, solving_time: float
 ) -> bool:
     """Returns False if you need to exit"""
-    print_header(maze, solver, generation_time, solving_time)
+    print_header(maze, generation_time, solving_time)
     count_path = 0
     if maze.config.animate_shortest_way:
         count_path += 1
@@ -180,7 +185,7 @@ def main() -> None:
         with open(maze.config.output_file, "w") as f:
             f.write(content)
         if maze.config.interactive and handle_interaction(
-            maze, solver, generation_time, solving_time
+            maze, generation_time, solving_time
         ):
             continue
         return
