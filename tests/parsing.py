@@ -1,6 +1,6 @@
 from unittest import TestCase
-from source.parse import Parser
-from source.vector2 import Vector2
+from mazegen.parse import Parser
+from mazegen.vector2 import Vector2
 
 
 class ParsingTests(TestCase):

@@ -1,8 +1,6 @@
-from source.vector2 import Vector2
-from source.parse import CheckedConfig
-from source.graphics import drawings, themes, Colors, Theme
-from source.walker_pa import Walker
-from source.walker import kruskal
+from mazegen.vector2 import Vector2
+from mazegen.parse import CheckedConfig
+from mazegen.graphics import drawings, themes, Colors, Theme
 import time
 
 
@@ -12,6 +10,8 @@ class MazeError(Exception):
 
 class Maze:
     def __init__(self, config: CheckedConfig) -> None:
+        from mazegen.brutal_path import Walker
+        from mazegen.kruskal import Kruskal
         self.config = config
         self.north: int = 0b1110
         self.east: int = 0b1101
@@ -22,10 +22,8 @@ class Maze:
         self.drawing: list[list[int]] = drawings[config.drawing]
         self.theme: Theme = themes[config.theme]
         self.maze: list = self.init_maze()
-        if self.config.animate_generation:
-            print("\033c", end="")
         if self.config.alt:
-            kruskal(self)
+            Kruskal.kruskal(self)
         else:
             walk = Walker(self)
             walk.walk_and_fill()

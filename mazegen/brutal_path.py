@@ -1,12 +1,12 @@
-from source.maze import Maze
-from source.vector2 import Vector2
-import random
+from mazegen.vector2 import Vector2
 from typing import Literal
+import random
 
 
 class Walker:
+    from mazegen.maze import Maze
+
     def __init__(self, maze: Maze):
-        # random.seed(16)
         self.maze = maze
         self.pos_line = 0
         self.pos_col = 0

@@ -2,8 +2,8 @@ from typing import Tuple, Any, Optional, KeysView, List
 from typing_extensions import Self
 from abc import ABC, abstractmethod
 from pydantic import BaseModel, Field, model_validator, ValidationError
-from source.graphics import drawings, themes
-from source.vector2 import Vector2
+from mazegen.graphics import drawings, themes
+from mazegen.vector2 import Vector2
 
 
 class CheckedConfig(BaseModel):

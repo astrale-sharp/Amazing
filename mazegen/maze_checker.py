@@ -1,5 +1,5 @@
-from source.maze import Maze
-from source.find_way import SolveMaze
+from mazegen.maze import Maze
+from mazegen.find_way import SolveMaze
 
 
 def check_is_accessible(

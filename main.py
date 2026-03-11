@@ -1,6 +1,6 @@
-from source.maze import Maze
-from source.find_way import SolveMaze
-import source.parse as parsing
+from mazegen.maze import Maze
+from mazegen.find_way import SolveMaze
+import mazegen.parse as parsing
 import random
 import sys
 from time import time

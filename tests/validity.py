@@ -1,10 +1,10 @@
 from unittest import TestCase
-import source.parse as parse
-from source.maze import Maze
-from source.walker import kruskal
-from source.walker_pa import Walker
-from source.maze_checker import check_valid_maze
-from source.find_way import SolveMaze
+import mazegen.parse as parse
+from mazegen.maze import Maze
+from mazegen.kruskal import Kruskal
+from mazegen.brutal_path import Walker
+from mazegen.maze_checker import check_valid_maze
+from mazegen.find_way import SolveMaze
 
 
 def get_config() -> parse.CheckedConfig:
@@ -34,7 +34,7 @@ class ValidityTests(TestCase):
                         c.perfect = perfect
                         maze = Maze(c)
                         if alt:
-                            kruskal(maze)
+                            Kruskal.kruskal(maze)
                         else:
                             walk = Walker(maze)
                             walk.walk_and_fill()

@@ -1,4 +1,4 @@
-from .maze import Maze
+from mazegen.maze import Maze
 
 
 class SolveMaze:
