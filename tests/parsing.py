@@ -9,7 +9,7 @@ class ParsingTests(TestCase):
         try:
             Parser.parse(txt)
             self.fail("should raise Value Error with missing keys")
-        except ValueError as v:
+        except ValueError:
             pass
 
     def test_missing_key(self):
@@ -22,7 +22,7 @@ class ParsingTests(TestCase):
         try:
             Parser.parse(txt)
             self.fail("should fail with missing key")
-        except ValueError as v:
+        except ValueError:
             pass
 
     def test_bad_int_value(self):
@@ -36,7 +36,7 @@ class ParsingTests(TestCase):
         try:
             Parser.parse(txt)
             self.fail("should fail with bad int value")
-        except ValueError as v:
+        except ValueError:
             pass
 
     def test_bad_bool_value(self):
@@ -50,9 +50,9 @@ class ParsingTests(TestCase):
         try:
             Parser.parse(txt)
             self.fail("should fail with bas bool")
-        except ValueError as v:
+        except ValueError:
             pass
-    
+
     def test_too_low_width_value(self):
         txt = """WIDTH=1
                  HEIGHT=12
@@ -64,9 +64,9 @@ class ParsingTests(TestCase):
         try:
             Parser.parse(txt)
             self.fail("should fail with bad int value")
-        except ValueError as v:
+        except ValueError:
             pass
-    
+
     def test_negative_width_value(self):
         txt = """WIDTH=-10
                  HEIGHT=12
@@ -78,7 +78,7 @@ class ParsingTests(TestCase):
         try:
             Parser.parse(txt)
             self.fail("should fail with bad int value")
-        except ValueError as v:
+        except ValueError:
             pass
 
     def test_negative_height_value(self):
@@ -92,7 +92,7 @@ class ParsingTests(TestCase):
         try:
             Parser.parse(txt)
             self.fail("should fail with bad int value")
-        except ValueError as v:
+        except ValueError:
             pass
 
     def test_too_big(self):
@@ -106,7 +106,7 @@ class ParsingTests(TestCase):
         try:
             Parser.parse(txt)
             self.fail("should fail with too large")
-        except ValueError as v:
+        except ValueError:
             pass
 
     def test_outside(self):
@@ -199,7 +199,7 @@ class ParsingTests(TestCase):
                  """
         ret = Parser.parse(txt)
         self.assertEqual(ret.theme, "rgb")
-    
+
     def test_with_lowercase(self):
         txt = """width=7
                  height=8

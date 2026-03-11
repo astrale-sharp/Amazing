@@ -56,7 +56,10 @@ class Maze:
             ]
             can_draw = self.can_draw_42()
             if not can_draw:
-                print("ERROR: The maze is too small to be printed")
+                print(
+                    "ERROR:",
+                    "The maze is too small for the drawing to be printed",
+                )
             for line in range(self.config.height):
                 for col in range(self.config.width):
                     if (

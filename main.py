@@ -3,12 +3,10 @@ from source.walker_pa import Walker
 from source.walker import kruskal
 from source.find_way import SolveMaze
 import source.parse as parsing
-from source.maze_checker import check_valid_maze
 import random
 from pydantic import ValidationError
 import sys
 from time import time
-from source.graphics import themes
 
 
 def handle_parse_one(maze, options, user_input):
@@ -42,7 +40,7 @@ def handle_parse_one(maze, options, user_input):
         else:
             setattr(maze.config, parser.key_name.lower(), res)
             print("\033c", end="")
-            print(f"The maze with updated config:")
+            print("The maze with updated config:")
             return True
     return True
 
@@ -59,11 +57,9 @@ def print_header(maze: Maze, solver: SolveMaze, generation_time, solving_time):
     print(f"Seed used: {maze.config.seed}")
     print(f"Alt: {maze.config.alt}")
     print(f"Perfect: {maze.config.perfect}")
-    print(
-        "Program {}took:\n{} secondes to generate the maze\n{} secondes to solve it".format(
-            animation, generation_time, solving_time
-        )
-    )
+    print(f"Program {animation}took:")
+    print(f"{generation_time} secondes to generate the maze")
+    print(f"{solving_time} secondes to solve it")
 
 
 def handle_interaction(
@@ -186,7 +182,6 @@ def main():
             solving_time = time() - x
             with open(maze.config.output_file, "w") as f:
                 f.write(content)
-
             if maze.config.interactive and handle_interaction(
                 maze, solver, generation_time, solving_time
             ):

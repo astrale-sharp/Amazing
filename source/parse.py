@@ -142,7 +142,6 @@ or space only, please use a valid name")
 
 
 class BoolParser(ArgParser):
-    allowed = ["True", "False"]
     def parse(self, str: str, line_number: int) -> ParseError | bool:
         str = str.strip().replace(" ", "")
         if str == "True":
