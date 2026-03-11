@@ -1,0 +1,43 @@
+from unittest import TestCase
+import source.parse as parse
+from source.maze import Maze
+from source.walker import kruskal
+from source.walker_pa import Walker
+from source.maze_checker import check_valid_maze
+from source.find_way import SolveMaze
+
+
+def get_config():
+    with open("config.txt", "r") as f:
+        arg = f.read()
+    return parse.Parser.parse(arg)
+
+
+class ValidityTests(TestCase):
+    def test_should_work(self):
+        c = get_config()
+        left = 4 * 4 * 2 * 2
+        for w in range(2, 200, 50):
+            for h in range(2, 200, 50):
+                for alt in [True, False]:
+                    for perfect in [True, False]:
+                        left -= 1
+                        print(left)
+                        c.width = w
+                        c.height = h
+                        c.entry = (0, 0)
+                        c.exit = (1, 1)
+                        c.alt = alt
+                        c.interactive = False
+                        c.animate_generation = False
+                        c.animate_shortest_way = False
+                        c.perfect = perfect
+                        maze = Maze(c)
+                        if alt:
+                            kruskal(maze)
+                        else:
+                            walk = Walker(maze)
+                            walk.walk_and_fill()
+                        s = SolveMaze(maze)
+                        s.output_shortest_way()
+                        self.assertTrue(not check_valid_maze(maze, s))
