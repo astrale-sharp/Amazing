@@ -86,13 +86,17 @@ class Maze:
                         ]
                         == 1
                     ):
-                        if [line, col] == self.config.entry:
+                        if Vector2(col, line) == Vector2.from_iter(
+                            self.config.entry
+                        ):
                             raise ValueError(
                                 "Entry = [{},{}] is in the drawing".format(
                                     line, col
                                 )
                             )
-                        elif [line, col] == self.config.exit:
+                        elif Vector2(col, line) == Vector2.from_iter(
+                            self.config.exit
+                        ):
                             raise ValueError(
                                 "Exit = [{},{}] is in the drawing".format(
                                     line, col
