@@ -7,13 +7,14 @@ import random
 from pydantic import ValidationError
 import sys
 from time import time
+from typing import Any
 
 
-def handle_parse_one(maze, options, user_input):
+def handle_parse_one(maze: Maze, options: list, user_input: int) -> bool:
     parser: parsing.KeyParser = options[user_input]
     if not isinstance(parser, parsing.KeyParser):
         raise TypeError(f"expected `KeyParser` got {type(parser)}")
-    res = None
+    res: Any = None
 
     if isinstance(parser.arg, parsing.DictKeysParser):
         print(f"Enter the new value for {parser.key_name}:")
@@ -22,8 +23,8 @@ def handle_parse_one(maze, options, user_input):
                 print(f"{i+1}- {opt}")
         arg = input()
         try:
-            arg = int(arg)
-            res = parser.arg.allowed[arg - 1]
+            int_arg = int(arg)
+            res = parser.arg.allowed[int_arg - 1]
         except ValueError:
             res = parser.arg.parse(arg, 0)
         except IndexError:
@@ -45,7 +46,9 @@ def handle_parse_one(maze, options, user_input):
     return True
 
 
-def print_header(maze: Maze, solver: SolveMaze, generation_time, solving_time):
+def print_header(
+    maze: Maze, solver: SolveMaze, generation_time: float, solving_time: float
+) -> None:
     print("\033c", end="")
     if not maze.can_draw_42():
         print("ERROR: The maze is too small to be printed")
@@ -63,8 +66,8 @@ def print_header(maze: Maze, solver: SolveMaze, generation_time, solving_time):
 
 
 def handle_interaction(
-    maze: Maze, solver: SolveMaze, generation_time, solving_time
-):
+    maze: Maze, solver: SolveMaze, generation_time: float, solving_time: float
+) -> bool:
     """Returns False if you need to exit"""
     print_header(maze, solver, generation_time, solving_time)
     count_path = 0
@@ -129,7 +132,7 @@ def handle_interaction(
                 return True
 
 
-def main():
+def main() -> None:
     if len(sys.argv) > 2:
         print(
             "ERROR: Too many args,"
@@ -143,8 +146,7 @@ def main():
     except FileNotFoundError:
         print("File not found, ", end="")
         print("please create a config.txt with the arguments:")
-        print(
-            """WIDTH=<int>
+        print("""WIDTH=<int>
                 HEIGHT=<int>
                 ENTRY=<int>,<int>
                 EXIT=<int>,<int>
@@ -153,8 +155,7 @@ def main():
                 [SEED=<str>]
                 [ANIMATE_GENERATION=<bool>]
                 [ANIMATE_SHORTEST_WAY=<bool>]
-                """
-        )
+                """)
         return
     except ValueError as e:
         print(e)
@@ -194,10 +195,8 @@ def main():
             print("ERROR:", e)
             return
         except IndexError:
-            print(
-                "ERROR: No configuration txt given as argument. \
-    Please run python3 a_maze_ing <filename>.txt"
-            )
+            print("ERROR: No configuration txt given as argument. \
+    Please run python3 a_maze_ing <filename>.txt")
             return
 
 

@@ -51,7 +51,7 @@ class CheckedConfig(BaseModel):
             )
         return self
 
-    def assert_is_in_bound(self, pos: Vector2):
+    def assert_is_in_bound(self, pos: Vector2) -> bool:
         return (
             pos.x >= 0
             and pos.x < self.width
@@ -74,7 +74,7 @@ class KeyParseResult:
         self.key_name = key_name
         self.value = value
 
-    def apply(self, pr: CheckedConfig):
+    def apply(self, pr: CheckedConfig) -> None:
         setattr(pr, self.key_name.lower(), self.value)
 
 
@@ -89,13 +89,13 @@ class KeyParser:
         self.key_name = key_name
         self.arg = arg
 
-    def accepts(self, line: str):
+    def accepts(self, line: str) -> bool:
         return line.upper().startswith(f"{self.key_name}=")
 
     def parse(
         self, line: str, line_number: int
     ) -> KeyParseResult | ParseError:
-        line = line[len(f"{self.key_name}="):]
+        line = line[len(f"{self.key_name}=") :]
         ret = self.arg.parse(line, line_number)
         if isinstance(ret, ParseError):
             return ParseError(line_number, f"Key: {self.key_name} : {ret.msg}")
@@ -136,8 +136,11 @@ class IdentParser(ArgParser):
     def parse(self, str: str, line_number: int) -> ParseError | str:
         str = str.strip()
         if len(str) == 0 or str.isspace():
-            return ParseError(line_number, f"`{str!r}` is empty \
-or space only, please use a valid name")
+            return ParseError(
+                line_number,
+                f"`{str!r}` is empty \
+or space only, please use a valid name",
+            )
         return str
 
 
@@ -201,7 +204,7 @@ class Parser:
     ]
 
     @classmethod
-    def interactable_extractors(cls):
+    def interactable_extractors(cls) -> list[KeyParser]:
         return [
             KeyParser("PERFECT", BoolParser()),
             OptKeyParser("ALT", BoolParser()),
@@ -235,13 +238,18 @@ class Parser:
                 if len(extractors) == 0:
                     errors.append(ParseError(i, "All keys were parsed"))
                 else:
-                    errors.append(ParseError(i, f"key '{line}' \
-not recognized"))
+                    errors.append(
+                        ParseError(
+                            i,
+                            f"key '{line}' \
+not recognized",
+                        )
+                    )
 
         def to_leftover_err(kp: KeyParser) -> str:
             return f"Key: {kp.key_name} was not found"
 
-        def is_not_opt(kp: KeyParser):
+        def is_not_opt(kp: KeyParser) -> bool:
             return not isinstance(kp, OptKeyParser)
 
         leftover = list(map(to_leftover_err, filter(is_not_opt, extractors)))
@@ -257,4 +265,4 @@ not recognized"))
             pr = CheckedConfig(**vars(pr))
             return pr
         except ValidationError as e:
-            raise ValueError(e.errors()[0]['msg'])
+            raise ValueError(e.errors()[0]["msg"])

@@ -1,7 +1,6 @@
 from source.maze import Maze
 from source.vector2 import Vector2
 from random import shuffle, choice
-from typing import List, Any
 
 
 def get_direction(maze: Maze, move: int) -> Vector2:
@@ -20,14 +19,18 @@ class DisjointSet:
     def __init__(self, pos: Vector2) -> None:
         self.pos: Vector2 = pos
         self.rank: int = 0
-        self.parent: Any = self
+        self.parent: "DisjointSet" = self
 
     @classmethod
-    def at(cls, sets: List[List[Any]], pos: Vector2) -> Any:
+    def at(
+        cls, sets: list[list["DisjointSet"]], pos: Vector2
+    ) -> "DisjointSet":
         return sets[pos.y][pos.x]
 
     @classmethod
-    def find(cls, sets: List[List[Any]], pos: Vector2):
+    def find(
+        cls, sets: list[list["DisjointSet"]], pos: Vector2
+    ) -> "DisjointSet":
         x = sets[pos.y][pos.x]
         while x != x.parent:
             x.parent = x.parent.parent
@@ -36,7 +39,7 @@ class DisjointSet:
 
     @classmethod
     def merge(
-        cls, sets: List[List[Any]], pos1: Vector2, pos2: Vector2
+        cls, sets: list[list["DisjointSet"]], pos1: Vector2, pos2: Vector2
     ) -> bool:
         x = cls.find(sets, pos1)
         y = cls.find(sets, pos2)
@@ -63,9 +66,9 @@ def decomp_cell(maze: Maze, cell: int) -> list:
     return cell_open
 
 
-def kruskal(maze: Maze):
+def kruskal(maze: Maze) -> None:
     walls = []
-    sets: List[List[DisjointSet]] = [
+    sets: list[list[DisjointSet]] = [
         [DisjointSet(Vector2(x, y)) for x in range(maze.config.width)]
         for y in range(maze.config.height)
     ]
@@ -77,8 +80,8 @@ def kruskal(maze: Maze):
             ]
             walls.extend([(Vector2(x, y), w) for w in cell_walls])
     shuffle(walls)
-    for pos, wall in walls:
-        cells_dividing: List[Vector2] = [
+    for i, (pos, wall) in enumerate(walls):
+        cells_dividing: list[Vector2] = [
             pos,
             pos + get_direction(maze, wall),
         ]
@@ -112,8 +115,7 @@ def kruskal(maze: Maze):
                     next_cell = pos + get_direction(maze, wall)
                     if (
                         maze.is_in_bound(next_cell)
-                        and maze.maze[next_cell.y]
-                        [next_cell.x] < 0b1111
+                        and maze.maze[next_cell.y][next_cell.x] < 0b1111
                     ):
                         maze.put_in_maze(pos, wall)
                         rev = {
@@ -125,7 +127,8 @@ def kruskal(maze: Maze):
                         maze.put_in_maze(next_cell, rev[wall])
                         count += 1
                     if maze.config.animate_generation:
-                        maze.print_maze_on_terminal("Kruskal generation...",
-                                                    False)
+                        maze.print_maze_on_terminal(
+                            "Kruskal generation...", False
+                        )
             else:
                 break

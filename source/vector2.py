@@ -1,5 +1,4 @@
 from typing import Any, Tuple, List
-from typing_extensions import Self
 
 
 class Vector2:
@@ -7,7 +6,7 @@ class Vector2:
         self.x = x
         self.y = y
 
-    def __add__(self, rhs: Any):
+    def __add__(self, rhs: Any) -> "Vector2":
         if not isinstance(rhs, Vector2):
             raise ValueError(
                 "+ operator not supported between Vector2 and {}".format(
@@ -16,7 +15,7 @@ class Vector2:
             )
         return Vector2(self.x + rhs.x, self.y + rhs.y)
 
-    def __sub__(self, rhs: Any):
+    def __sub__(self, rhs: Any) -> "Vector2":
         if not isinstance(rhs, Vector2):
             raise ValueError(
                 "- operator not supported between Vector2 and {}".format(
@@ -40,14 +39,14 @@ class Vector2:
     def __repr__(self) -> str:
         return str(self)
 
-    def __hash__(self):
+    def __hash__(self) -> int:
         return hash((self.x, self.y))
 
     def as_tuple(self) -> Tuple[int, int]:
         return self.x, self.y
 
     @classmethod
-    def from_iter(cls, tup: Tuple[int, int] | List[int]) -> Self:
+    def from_iter(cls, tup: Tuple[int, int] | List[int]) -> "Vector2":
         return cls(tup[0], tup[1])
 
     def inverted(self) -> Any:

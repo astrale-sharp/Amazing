@@ -7,14 +7,14 @@ from source.maze_checker import check_valid_maze
 from source.find_way import SolveMaze
 
 
-def get_config():
+def get_config() -> parse.CheckedConfig:
     with open("config.txt", "r") as f:
         arg = f.read()
     return parse.Parser.parse(arg)
 
 
 class ValidityTests(TestCase):
-    def test_should_work(self):
+    def test_should_work(self) -> None:
         c = get_config()
         left = 4 * 4 * 2 * 2
         for w in range(2, 200, 50):

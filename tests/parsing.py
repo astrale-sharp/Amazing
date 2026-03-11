@@ -4,7 +4,7 @@ from source.vector2 import Vector2
 
 
 class ParsingTests(TestCase):
-    def test_empty(self):
+    def test_empty(self) -> None:
         txt = """"""
         try:
             Parser.parse(txt)
@@ -12,7 +12,7 @@ class ParsingTests(TestCase):
         except ValueError:
             pass
 
-    def test_missing_key(self):
+    def test_missing_key(self) -> None:
         txt = """WIDTH=4
                  HEIGHT=5
                  ENTRY=6,7
@@ -25,7 +25,7 @@ class ParsingTests(TestCase):
         except ValueError:
             pass
 
-    def test_bad_int_value(self):
+    def test_bad_int_value(self) -> None:
         txt = """WIDTH=4
                  HEIGHT=ewr
                  ENTRY=6,7
@@ -39,7 +39,7 @@ class ParsingTests(TestCase):
         except ValueError:
             pass
 
-    def test_bad_bool_value(self):
+    def test_bad_bool_value(self) -> None:
         txt = """WIDTH=4
                  HEIGHT=5
                  ENTRY=6,7
@@ -53,7 +53,7 @@ class ParsingTests(TestCase):
         except ValueError:
             pass
 
-    def test_too_low_width_value(self):
+    def test_too_low_width_value(self) -> None:
         txt = """WIDTH=1
                  HEIGHT=12
                  ENTRY=6,7
@@ -67,7 +67,7 @@ class ParsingTests(TestCase):
         except ValueError:
             pass
 
-    def test_negative_width_value(self):
+    def test_negative_width_value(self) -> None:
         txt = """WIDTH=-10
                  HEIGHT=12
                  ENTRY=6,7
@@ -81,7 +81,7 @@ class ParsingTests(TestCase):
         except ValueError:
             pass
 
-    def test_negative_height_value(self):
+    def test_negative_height_value(self) -> None:
         txt = """WIDTH=10
                  HEIGHT=-12
                  ENTRY=6,7
@@ -95,7 +95,7 @@ class ParsingTests(TestCase):
         except ValueError:
             pass
 
-    def test_too_big(self):
+    def test_too_big(self) -> None:
         txt = """WIDTH=14000
                  HEIGHT=5
                  ENTRY=6,7
@@ -109,7 +109,7 @@ class ParsingTests(TestCase):
         except ValueError:
             pass
 
-    def test_outside(self):
+    def test_outside(self) -> None:
         txt = """WIDTH=14
                  HEIGHT=5
                  ENTRY=14,7
@@ -123,7 +123,7 @@ class ParsingTests(TestCase):
         except ValueError:
             pass
 
-    def test_good_data(self):
+    def test_good_data(self) -> None:
         txt = """WIDTH=7
                  HEIGHT=8
                  ENTRY=1,2
@@ -140,7 +140,7 @@ class ParsingTests(TestCase):
         self.assertEqual(ret.perfect, True)
         self.assertEqual(ret.seed, None)
 
-    def test_good_data_case(self):
+    def test_good_data_case(self) -> None:
         txt = """WiDTH=7
                  HEIgHT=8
                  ENTRy=1,2
@@ -157,7 +157,7 @@ class ParsingTests(TestCase):
         self.assertEqual(ret.perfect, True)
         self.assertEqual(ret.seed, None)
 
-    def test_good_data_with_alt(self):
+    def test_good_data_with_alt(self) -> None:
         txt = """WIDTH=7
                  HEIGHT=8
                  ENTRY=1,2
@@ -176,7 +176,7 @@ class ParsingTests(TestCase):
         self.assertEqual(ret.seed, None)
         self.assertEqual(ret.alt, True)
 
-    def test_good_data_with_seed(self):
+    def test_good_data_with_seed(self) -> None:
         txt = """WIDTH=7
                  HEIGHT=8
                  ENTRY=1,2
@@ -188,7 +188,7 @@ class ParsingTests(TestCase):
         ret = Parser.parse(txt)
         self.assertEqual(ret.seed, "eyyeyeye")
 
-    def test_with_theme(self):
+    def test_with_theme(self) -> None:
         txt = """WIDTH=7
                  HEIGHT=8
                  ENTRY=1,2
@@ -200,7 +200,7 @@ class ParsingTests(TestCase):
         ret = Parser.parse(txt)
         self.assertEqual(ret.theme, "rgb")
 
-    def test_with_lowercase(self):
+    def test_with_lowercase(self) -> None:
         txt = """width=7
                  height=8
                  entry=1,2
@@ -212,7 +212,7 @@ class ParsingTests(TestCase):
         ret = Parser.parse(txt)
         self.assertEqual(ret.theme, "rgb")
 
-    def test_with_spaces(self):
+    def test_with_spaces(self) -> None:
         txt = """WIDTH= 7
                  HEIGHT= 8
                  ENTRY= 1 , 2
@@ -224,7 +224,7 @@ class ParsingTests(TestCase):
         ret = Parser.parse(txt)
         self.assertEqual(ret.theme, "rgb")
 
-    def test_with_invalid_theme(self):
+    def test_with_invalid_theme(self) -> None:
         txt = """WIDTH=7
                  HEIGHT=8
                  ENTRY=1,2
@@ -239,7 +239,7 @@ class ParsingTests(TestCase):
         except ValueError:
             pass
 
-    def test_with_drawing(self):
+    def test_with_drawing(self) -> None:
         txt = """WIDTH=7
                  HEIGHT=8
                  ENTRY=1,2
@@ -251,7 +251,7 @@ class ParsingTests(TestCase):
         r = Parser.parse(txt)
         self.assertEqual(r.drawing, "42")
 
-    def test_with_invalid_drawing(self):
+    def test_with_invalid_drawing(self) -> None:
         txt = """WIDTH=7
                  HEIGHT=8
                  ENTRY=1,2

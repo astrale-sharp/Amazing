@@ -25,7 +25,7 @@ class Maze:
         value_cell: int = self.maze[pos.y][pos.x]
         return value_cell
 
-    def set_cell(self, pos: Vector2, value: int):
+    def set_cell(self, pos: Vector2, value: int) -> None:
         self.maze[pos.y][pos.x] = value
 
     def is_in_bound(self, pos: Vector2) -> bool:
@@ -101,8 +101,9 @@ class Maze:
                         maze[line][col] = 0b11111
                         self.nb_cell_to_fill -= 1
         else:
-            raise MazeError("Invalid information:\
- width and height must be > 0")
+            raise MazeError(
+                "Invalid information: width and height must be > 0"
+            )
         return maze
 
     def can_draw_42(self) -> bool:
@@ -131,71 +132,108 @@ class Maze:
         else:
             print()
             for _ in range(self.config.width * 4 + 1):
-                print(self.theme.wall_color + " "
-                      + Colors.ENDC.value, end="")
+                print(self.theme.wall_color + " " + Colors.ENDC.value, end="")
             print()
             for line in range(self.config.height):
                 for middle in range(2):
-                    print(self.theme.wall_color + " "
-                          + Colors.ENDC.value, end="")
+                    print(
+                        self.theme.wall_color + " " + Colors.ENDC.value, end=""
+                    )
                     for col in range(self.config.width):
                         cell = self.maze[line][col]
                         if middle == 0:
                             if (col, line) == self.config.entry:
-                                print(self.theme.entry_color + "En"
-                                      + Colors.ENDC.value, end="")
+                                print(
+                                    self.theme.entry_color
+                                    + "En"
+                                    + Colors.ENDC.value,
+                                    end="",
+                                )
                             elif (col, line) == self.config.exit:
-                                print(self.theme.exit_color + "Ex"
-                                      + Colors.ENDC.value, end="")
+                                print(
+                                    self.theme.exit_color
+                                    + "Ex"
+                                    + Colors.ENDC.value,
+                                    end="",
+                                )
                             elif convert:
                                 if cell >> 6 & 1 == 1:
-                                    print(self.theme.tail_solver_color
-                                          + "  " + Colors.ENDC.value, end="")
+                                    print(
+                                        self.theme.tail_solver_color
+                                        + "  "
+                                        + Colors.ENDC.value,
+                                        end="",
+                                    )
                                 elif cell >> 5 & 1 == 1:
-                                    print(self.theme.head_solver_color
-                                          + "  " + Colors.ENDC.value, end="")
+                                    print(
+                                        self.theme.head_solver_color
+                                        + "  "
+                                        + Colors.ENDC.value,
+                                        end="",
+                                    )
                                 elif cell == 0b11111:
-                                    print(self.theme.draw_color
-                                          + "  " + Colors.ENDC.value, end="")
+                                    print(
+                                        self.theme.draw_color
+                                        + "  "
+                                        + Colors.ENDC.value,
+                                        end="",
+                                    )
                                 else:
                                     print("  ", end="")
                             elif cell == 0b11111:
-                                print(self.theme.tail_solver_color
-                                      + "  " + Colors.ENDC.value, end="")
+                                print(
+                                    self.theme.tail_solver_color
+                                    + "  "
+                                    + Colors.ENDC.value,
+                                    end="",
+                                )
                             else:
                                 print("  ", end="")
                             if cell >> 1 & 1 == 1:
-                                print(self.theme.wall_color
-                                      + "  " + Colors.ENDC.value, end="")
+                                print(
+                                    self.theme.wall_color
+                                    + "  "
+                                    + Colors.ENDC.value,
+                                    end="",
+                                )
                             else:
                                 if convert:
                                     if (
                                         (col, line) == self.config.entry
                                         and col + 1 < self.config.width
-                                        and self.maze[line]
-                                        [col + 1] >> 6 & 1 == 1
+                                        and self.maze[line][col + 1] >> 6 & 1
+                                        == 1
                                     ):
-                                        print(self.theme.tail_solver_color
-                                              + "  " + Colors.ENDC.value,
-                                              end="")
+                                        print(
+                                            self.theme.tail_solver_color
+                                            + "  "
+                                            + Colors.ENDC.value,
+                                            end="",
+                                        )
                                     elif (
                                         cell >> 6 & 1 == 1
                                         and col + 1 < self.config.width
-                                        and self.maze[line]
-                                        [col + 1] >> 6 & 1 == 1
+                                        and self.maze[line][col + 1] >> 6 & 1
+                                        == 1
                                     ):
-                                        print(self.theme.tail_solver_color
-                                              + "  " + Colors.ENDC.value,
-                                              end="")
+                                        print(
+                                            self.theme.tail_solver_color
+                                            + "  "
+                                            + Colors.ENDC.value,
+                                            end="",
+                                        )
                                     elif (
                                         cell >> 5 & 1 == 1
                                         and col + 1 < self.config.width
-                                        and self.maze[line]
-                                        [col + 1] >> 5 & 1 == 1
+                                        and self.maze[line][col + 1] >> 5 & 1
+                                        == 1
                                     ):
-                                        print(self.theme.head_solver_color
-                                              + "  " + Colors.ENDC.value,
-                                              end="")
+                                        print(
+                                            self.theme.head_solver_color
+                                            + "  "
+                                            + Colors.ENDC.value,
+                                            end="",
+                                        )
                                     else:
                                         print("  ", end="")
                                 else:
@@ -203,8 +241,12 @@ class Maze:
 
                         if middle == 1:
                             if cell >> 2 & 1 == 1:
-                                print(self.theme.wall_color
-                                      + "    " + Colors.ENDC.value, end="")
+                                print(
+                                    self.theme.wall_color
+                                    + "    "
+                                    + Colors.ENDC.value,
+                                    end="",
+                                )
                                 continue
                             elif convert:
                                 if (
@@ -212,31 +254,45 @@ class Maze:
                                     and line + 1 < self.config.height
                                     and self.maze[line + 1][col] >> 6 & 1 == 1
                                 ):
-                                    print(self.theme.tail_solver_color
-                                          + "  " + Colors.ENDC.value, end="")
+                                    print(
+                                        self.theme.tail_solver_color
+                                        + "  "
+                                        + Colors.ENDC.value,
+                                        end="",
+                                    )
                                 elif (
                                     cell >> 6 & 1 == 1
                                     and line + 1 < self.config.height
-                                    and self.maze[line + 1]
-                                    [col] >> 6 & 1 == 1
+                                    and self.maze[line + 1][col] >> 6 & 1 == 1
                                 ):
-                                    print(self.theme.tail_solver_color
-                                          + "  " + Colors.ENDC.value, end="")
+                                    print(
+                                        self.theme.tail_solver_color
+                                        + "  "
+                                        + Colors.ENDC.value,
+                                        end="",
+                                    )
                                 elif (
                                     cell >> 5 & 1 == 1
                                     and line + 1 < self.config.height
-                                    and self.maze[line + 1]
-                                    [col] >> 5 & 1 == 1
+                                    and self.maze[line + 1][col] >> 5 & 1 == 1
                                 ):
-                                    print(self.theme.head_solver_color
-                                          + "  " + Colors.ENDC.value, end="")
+                                    print(
+                                        self.theme.head_solver_color
+                                        + "  "
+                                        + Colors.ENDC.value,
+                                        end="",
+                                    )
                                 else:
                                     print("  ", end="")
                             else:
                                 print("  ", end="")
                             if cell >> 1 & 1 == 1:
-                                print(self.theme.wall_color
-                                      + "  " + Colors.ENDC.value, end="")
+                                print(
+                                    self.theme.wall_color
+                                    + "  "
+                                    + Colors.ENDC.value,
+                                    end="",
+                                )
                             else:
                                 if (
                                     line + 1 < self.config.height
@@ -252,17 +308,26 @@ class Maze:
                                             cell_col >> 1 & 1 == 1
                                             and cell_bot >> 2 & 1 == 1
                                         ):
-                                            print(self.theme.wall_color
-                                                  + "  " + Colors.ENDC.value,
-                                                  end="")
+                                            print(
+                                                self.theme.wall_color
+                                                + "  "
+                                                + Colors.ENDC.value,
+                                                end="",
+                                            )
                                         elif cell_bot >> 1 & 1 == 1:
-                                            print(self.theme.wall_color
-                                                  + "  " + Colors.ENDC.value,
-                                                  end="")
+                                            print(
+                                                self.theme.wall_color
+                                                + "  "
+                                                + Colors.ENDC.value,
+                                                end="",
+                                            )
                                         elif cell_col >> 2 & 1 == 1:
-                                            print(self.theme.wall_color
-                                                  + "  " + Colors.ENDC.value,
-                                                  end="")
+                                            print(
+                                                self.theme.wall_color
+                                                + "  "
+                                                + Colors.ENDC.value,
+                                                end="",
+                                            )
                                         else:
                                             print("  ", end="")
                                     else:
@@ -273,7 +338,9 @@ class Maze:
             print()
         return content
 
-    def print_maze_on_terminal(self, msg: str, sleep=True, convert=None):
+    def print_maze_on_terminal(
+        self, msg: str, sleep: bool = True, convert: str | None = None
+    ) -> None:
         print("\033[H")
         if not self.can_draw_42():
             print("ERROR: The maze is too small to be printed")
